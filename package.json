@@ -9,7 +9,7 @@
     "android:open": "npm run cap:sync && cap open android",
     "android:build": "npm run cap:sync && cd android && gradlew.bat assembleRelease",
     "android:bundle": "npm run cap:sync && cd android && gradlew.bat bundleRelease",
-    "zip:itch": "node tools/zip-itch.js"
+    "zip:itch": "python tools/zip_itch.py"
   },
   "devDependencies": {
     "@capacitor/cli": "^6.2.0"
