@@ -164,6 +164,31 @@ window.SFX = (() => {
     timeup() { tone(440, 0.5, 'sawtooth', 0.2, 130); },
     endTurn(){ [523, 392].forEach((f, i) => setTimeout(() => tone(f, 0.24, 'sine', 0.17), i * 130)); },
     endRound(){ [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, 0.22, 'sine', 0.18), i * 110)); },
-    win()    { [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => setTimeout(() => tone(f, 0.24, 'sine', 0.2), i * 120)); }
+    // FANFARRIA de victoria: alegre y triunfal (Do mayor). Arpegio ascendente
+    // con acordes de apoyo, remate brillante y un acorde final sostenido festivo.
+    win() {
+      const C = 523.25, E = 659.25, G = 783.99, C2 = 1046.5, E2 = 1318.5, G2 = 1568, C3 = 2093;
+      // toque cálido (fundamental + 5ª suave) para que cada nota suene "llena"
+      const hit = (f, dur, vol, t) => {
+        setTimeout(() => {
+          tone(f, dur, 'triangle', vol);
+          tone(f * 1.5, dur * 0.8, 'sine', vol * 0.35);   // quinta, brillo
+        }, t);
+      };
+      // motivo rítmico ascendente tipo fanfarria (corchea-corchea-negra)
+      hit(G,  0.14, 0.20,   0);
+      hit(C2, 0.14, 0.20, 120);
+      hit(E2, 0.26, 0.22, 240);
+      hit(C2, 0.14, 0.18, 470);
+      hit(E2, 0.14, 0.20, 590);
+      hit(G2, 0.45, 0.24, 710);
+      // acorde final triunfal (Do mayor amplio) que se sostiene
+      [C, E, G, C2, E2, G2].forEach((f, i) =>
+        setTimeout(() => { tone(f, 0.9, 'triangle', 0.16); tone(f, 0.9, 'sine', 0.08); }, 1180));
+      // chispa brillante final
+      setTimeout(() => tone(C3, 0.7, 'sine', 0.14), 1220);
+      // pequeño "shimmer" festivo descendente sobre el acorde
+      [G2, E2, C2].forEach((f, i) => setTimeout(() => tone(f * 2, 0.18, 'sine', 0.07), 1300 + i * 110));
+    }
   };
 })();
