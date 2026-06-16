@@ -1,0 +1,27 @@
+# Dependencias (regenerables con npm install)
+node_modules/
+
+# Carpeta generada por sync-www.js (regenerable con: node tools/sync-www.js)
+www/
+
+# Artefactos de build Android
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/.idea/
+android/app/release/
+
+# Secretos de firma Android — NUNCA subir (expondrían la firma de la app)
+*.jks
+*.keystore
+keystore.properties
+android/keystore.properties
+
+# Sesión de Claude Code
+.claude/
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.log

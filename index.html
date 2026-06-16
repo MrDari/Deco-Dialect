@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0b0607" />
+<meta name="description" content="Deco Dialect — juego de palabras por equipos con estética Art Deco-Neón. 2 a 20 jugadores." />
+<title>Deco Dialect</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<!-- Fuentes auto-hospedadas (declaradas en css/style.css con @font-face). Precarga la
+     principal para que el primer texto no parpadee. 100% offline, sin CDN externo. -->
+<link rel="preload" href="fonts/cinzel-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <canvas id="bg" aria-hidden="true"></canvas>
+
+  <!-- Marco neón Art Deco (decorativo, no interactivo) -->
+  <div id="deco-frame" aria-hidden="true">
+    <span class="dc dc-tl"></span><span class="dc dc-tr"></span>
+    <span class="dc dc-bl"></span><span class="dc dc-br"></span>
+  </div>
+
+  <!-- ====================== SPLASH (presentación) ====================== -->
+  <div id="splash" aria-hidden="true">
+    <div class="splash-badge">
+      <svg class="splash-logo" viewBox="0 0 100 92" width="120" height="110" aria-hidden="true">
+        <defs>
+          <linearGradient id="hx" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ffd24a"/>
+            <stop offset="0.5" stop-color="#ff7a1a"/>
+            <stop offset="1" stop-color="#e21b1b"/>
+          </linearGradient>
+        </defs>
+        <g fill="none" stroke="url(#hx)" stroke-width="3" stroke-linejoin="round">
+          <polygon points="34,16 42,11 50,16 50,26 42,31 34,26"/>
+          <polygon points="50,16 58,11 66,16 66,26 58,31 50,26"/>
+          <polygon points="42,31 50,26 58,31 58,41 50,46 42,41"/>
+          <polygon points="26,31 34,26 42,31 42,41 34,46 26,41"/>
+          <polygon points="58,31 66,26 74,31 74,41 66,46 58,41"/>
+          <polygon points="42,46 50,41 58,46 58,56 50,61 42,56"/>
+          <polygon points="50,56 54,68 50,80 46,68"/>
+        </g>
+      </svg>
+      <span class="splash-name">DE IA SOLUTIONS</span>
+    </div>
+  </div>
+
+  <div id="app">
+    <!-- ====================== MENÚ ====================== -->
+    <section class="screen active" id="screen-menu">
+      <div class="neon-frame">
+        <div class="lang-switch" role="group" aria-label="Idioma">
+          <button class="flag-btn active" data-lang="es-ES" title="Español" aria-label="Español">
+            <svg viewBox="0 0 30 20" width="30" height="20" aria-hidden="true">
+              <rect width="30" height="20" fill="#c60b1e"/>
+              <rect y="5" width="30" height="10" fill="#ffc400"/>
+            </svg>
+          </button>
+          <button class="flag-btn" data-lang="en" title="English" aria-label="English">
+            <svg viewBox="0 0 30 20" width="30" height="20" aria-hidden="true">
+              <clipPath id="uk"><rect width="30" height="20"/></clipPath>
+              <g clip-path="url(#uk)">
+                <rect width="30" height="20" fill="#012169"/>
+                <path d="M0,0 30,20 M30,0 0,20" stroke="#fff" stroke-width="4"/>
+                <path d="M0,0 30,20 M30,0 0,20" stroke="#c8102e" stroke-width="2"/>
+                <path d="M15,0 V20 M0,10 H30" stroke="#fff" stroke-width="6"/>
+                <path d="M15,0 V20 M0,10 H30" stroke="#c8102e" stroke-width="3.5"/>
+              </g>
+            </svg>
+          </button>
+        </div>
+
+        <h1 class="logo">DECO DIALECT</h1>
+
+        <div class="hero-cards" aria-hidden="true">
+          <span class="hero-card left">D</span>
+          <span class="hero-card gold">I</span>
+          <span class="hero-card right">C</span>
+        </div>
+
+        <p class="tagline" data-i18n="tagline">El juego de palabras por equipos</p>
+
+        <div class="menu-buttons">
+          <button class="btn btn-primary" id="btn-play" data-i18n="play">JUGAR</button>
+          <button class="btn" id="btn-howto" data-i18n="howto">CÓMO JUGAR</button>
+        </div>
+
+        <button class="icon-toggle" id="btn-sound" aria-label="Sonido" title="Sonido">♪</button>
+      </div>
+    </section>
+
+    <!-- ====================== CONFIGURACIÓN ====================== -->
+    <section class="screen" id="screen-setup">
+      <div class="neon-frame wide scroll">
+        <h2 class="section-title" data-i18n="setupTitle">Configurar partida</h2>
+
+        <div class="setup-grid">
+          <div class="field">
+            <label data-i18n="teamsLabel" id="lbl-teams">Equipos</label>
+            <div class="stepper" data-stepper="teams" role="group" aria-labelledby="lbl-teams">
+              <button class="step-btn" data-delta="-1" aria-label="−">−</button>
+              <span class="step-val" id="val-teams" aria-live="polite">2</span>
+              <button class="step-btn" data-delta="1" aria-label="+">+</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label data-i18n="roundsLabel" id="lbl-rounds">Rondas</label>
+            <div class="stepper" data-stepper="rounds" role="group" aria-labelledby="lbl-rounds">
+              <button class="step-btn" data-delta="-1" aria-label="−">−</button>
+              <span class="step-val" id="val-rounds" aria-live="polite">5</span>
+              <button class="step-btn" data-delta="1" aria-label="+">+</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label data-i18n="timeLabel">Duración (s)</label>
+            <div class="seg" data-seg="time">
+              <button class="seg-btn" data-val="30">30</button>
+              <button class="seg-btn active" data-val="60">60</button>
+              <button class="seg-btn" data-val="90">90</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="team-names" class="team-names"></div>
+
+        <div class="setup-actions">
+          <button class="btn" id="btn-back-menu" data-i18n="back">VOLVER</button>
+          <button class="btn btn-primary" id="btn-start" data-i18n="start">EMPEZAR</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================== TURNO (transición) ====================== -->
+    <section class="screen" id="screen-turn">
+      <div class="turn-card">
+        <p class="turn-round"><span data-i18n="round">Ronda</span> <span id="turn-round-num">1</span></p>
+        <h2 class="turn-team" id="turn-team-name">Equipo 1</h2>
+        <p class="turn-hint" data-i18n="getReady">¡Preparados!</p>
+        <button class="btn btn-primary big" id="btn-go" data-i18n="go">¡A JUGAR!</button>
+      </div>
+    </section>
+
+    <!-- ====================== JUEGO ====================== -->
+    <section class="screen" id="screen-play">
+      <div class="play-top">
+        <div class="plate" id="plate-turn"><span class="plate-label" data-i18n="turn">TURNO</span>: <span id="hud-team-name">A</span></div>
+        <div class="plate" id="plate-round"><span class="plate-label" data-i18n="round">RONDA</span>: <span id="hud-round">1</span></div>
+      </div>
+
+      <div class="timer-plate">
+        <span id="timer-num">01:00</span>
+      </div>
+      <div class="timer-track"><div class="timer-fill" id="timer-fill"></div></div>
+
+      <div class="scorebar" id="scorebar"></div>
+
+      <!-- Panel categorías -->
+      <div class="panel panel-cats">
+        <div class="panel-head" data-i18n="categoryHead">CATEGORÍA</div>
+        <div class="panel-body" id="cat-list"></div>
+      </div>
+
+      <!-- Panel letras -->
+      <div class="panel panel-letters">
+        <div class="panel-head" data-i18n="letterHead">LETRA</div>
+        <div class="panel-body cards-body" id="cards-area"></div>
+      </div>
+
+      <div class="play-bottom">
+        <button class="action-btn hit" id="btn-hit"><span data-i18n="hit">¡Acierto!</span> <span class="badge">+1</span></button>
+        <button class="action-btn menu" id="btn-pause" data-i18n="menu">MENÚ</button>
+        <button class="action-btn golden" id="btn-golden"><span data-i18n="goldenHit">¡Dorada!</span> <span class="badge">+2</span></button>
+      </div>
+    </section>
+
+    <!-- ====================== RESUMEN DE TURNO / RONDA ====================== -->
+    <section class="screen" id="screen-roundsum">
+      <div class="neon-frame">
+        <p class="sum-banner" id="sum-banner">FIN DE TURNO</p>
+        <p class="sum-sub" id="sum-sub"></p>
+        <p class="big-score">+<span id="turn-points">0</span></p>
+        <div class="scoreboard" id="mini-scoreboard"></div>
+        <button class="btn btn-primary" id="btn-next" data-i18n="next">CONTINUAR</button>
+      </div>
+    </section>
+
+    <!-- ====================== FINAL ====================== -->
+    <section class="screen" id="screen-result">
+      <div class="neon-frame">
+        <h2 class="section-title" data-i18n="winner">¡Ganador!</h2>
+        <div class="trophy">♛</div>
+        <h2 class="winner-name" id="winner-name">Equipo 1</h2>
+        <div class="scoreboard" id="final-scoreboard"></div>
+        <div class="setup-actions">
+          <button class="btn" id="btn-rematch" data-i18n="rematch">REVANCHA</button>
+          <button class="btn btn-primary" id="btn-home" data-i18n="home">INICIO</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================== CÓMO JUGAR (modal) ====================== -->
+    <div class="modal-overlay" id="modal-howto">
+      <div class="modal neon-frame scroll">
+        <h2 class="section-title" data-i18n="howto">Cómo jugar</h2>
+        <ul class="rules" id="rules-list"></ul>
+        <button class="btn btn-primary" id="btn-close-howto" data-i18n="gotit">¡ENTENDIDO!</button>
+      </div>
+    </div>
+
+    <!-- ====================== PAUSA (modal) ====================== -->
+    <div class="modal-overlay" id="modal-pause">
+      <div class="modal neon-frame pause-menu">
+        <button class="btn btn-primary big" id="btn-resume" data-i18n="resume">CONTINUAR</button>
+        <button class="btn big" id="btn-restart" data-i18n="restartTurn">REINICIAR TURNO</button>
+        <button class="btn btn-danger big" id="btn-exit" data-i18n="exit">SALIR</button>
+      </div>
+    </div>
+  </div>
+
+  <script defer src="js/i18n.js"></script>
+  <script defer src="js/data.js"></script>
+  <script defer src="js/audio.js"></script>
+  <script defer src="js/render.js"></script>
+  <script defer src="js/game.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+    }
+  </script>
+</body>
+</html>

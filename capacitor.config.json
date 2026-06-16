@@ -1,0 +1,18 @@
+{
+  "appId": "dev.sh4rkdev.decodialect",
+  "appName": "Deco Dialect",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "backgroundColor": "#0d0a0c",
+      "showSpinner": false
+    }
+  }
+}
