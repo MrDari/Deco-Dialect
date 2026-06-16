@@ -1,4 +1,4 @@
-package dev.sh4rkdev.decodialect;
+package dev.sharkdev.decodialect;
 
 import com.getcapacitor.BridgeActivity;
 

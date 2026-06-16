@@ -9,10 +9,10 @@ if (keystorePropsFile.exists()) {
 }
 
 android {
-    namespace "dev.sh4rkdev.decodialect"
+    namespace "dev.sharkdev.decodialect"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "dev.sh4rkdev.decodialect"
+        applicationId "dev.sharkdev.decodialect"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
