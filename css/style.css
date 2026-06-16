@@ -294,6 +294,15 @@ h1, h2 { font-weight: 600; }
   animation: timer-pulse .9s ease-in-out infinite;
 }
 @keyframes timer-pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.12); opacity: .82; } }
+/* sacudida roja al penalizar (saltar categoría) */
+.timer-plate.penalty { animation: timer-penalty .45s ease; }
+@keyframes timer-penalty {
+  0%   { color: var(--red); transform: translateX(0) scale(1.15); text-shadow: 0 0 16px #e23048; }
+  25%  { transform: translateX(-5px); }
+  50%  { transform: translateX(5px); }
+  75%  { transform: translateX(-3px); }
+  100% { color: var(--ink); transform: translateX(0) scale(1); }
+}
 .timer-track {
   width: 100%; height: 5px; border-radius: 999px;
   background: #ffffff14; overflow: hidden;
@@ -339,6 +348,23 @@ h1, h2 { font-weight: 600; }
 .panel-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; min-height: 0; flex: 1 1 auto; }
 /* categorías: las filas se reparten para llenar el panel, SIN scroll */
 .panel-cats .panel-body { justify-content: stretch; gap: 7px; overflow: hidden; }
+
+/* cabecera de CATEGORÍA con botón de saltar a la derecha */
+.panel-head-cats { display: flex; align-items: center; justify-content: center; position: relative; }
+.skip-btn {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+  font-family: 'Rajdhani', sans-serif; font-weight: 700; letter-spacing: .5px;
+  font-size: 11px; text-transform: uppercase; color: #fff; cursor: pointer;
+  padding: 4px 9px; border-radius: 999px;
+  border: 1px solid #ffffff66; background: #00000040;
+  transition: transform .08s, background .2s, opacity .2s;
+}
+.skip-btn .skip-pen { font-size: 10px; color: #ffd2d8; font-weight: 700; }
+.skip-btn:active { transform: translateY(-50%) scale(.92); }
+.skip-btn:disabled { opacity: .4; pointer-events: none; }
+/* el título queda centrado pese al botón a la derecha */
+.panel-head-cats > span:first-child { padding: 0 76px; }
 
 /* categorías — pastillas con el mismo estilo que las cartas.
    flex: 1 1 0 + min-height: 0 => las filas se reparten SIEMPRE el alto del panel,

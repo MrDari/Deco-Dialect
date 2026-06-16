@@ -162,6 +162,11 @@ window.SFX = (() => {
       tone(hi * 1.9, 0.02, 'square', 0.16);        // "click" metálico encima
     },
     timeup() { tone(440, 0.5, 'sawtooth', 0.2, 130); },
+    // penalización al saltar categoría: "whoosh" grave descendente (resta tiempo)
+    penalty() {
+      tone(330, 0.18, 'sawtooth', 0.16, 160);
+      setTimeout(() => tone(247, 0.22, 'sawtooth', 0.14, 120), 90);
+    },
     endTurn(){ [523, 392].forEach((f, i) => setTimeout(() => tone(f, 0.24, 'sine', 0.17), i * 130)); },
     endRound(){ [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, 0.22, 'sine', 0.18), i * 110)); },
     // FANFARRIA de victoria: alegre y triunfal (Do mayor). Arpegio ascendente

@@ -242,8 +242,9 @@
       SFX.gold();
     } else {
       state.turnPoints += 1;
-      const used = new Set([state.cards[2].ch]);
-      [0, 1].forEach(k => {
+      // el acierto normal renueva la CARTA DE LETRAS COMPLETA (las 3, incluida la dorada)
+      const used = new Set();
+      [0, 1, 2].forEach(k => {
         let c, g = 0; do { c = randLetter(); } while (used.has(c) && g++ < 50);
         used.add(c); state.cards[k].ch = c; refreshCard(k);
       });
@@ -252,6 +253,28 @@
     updateScorebarLive();
     flashButton(gold ? '#btn-golden' : '#btn-hit');
   }
+  // Saltar categoría: cuando no sabes la categoría, la cambias por otra nueva
+  // a cambio de una PENALIZACIÓN de 5 segundos en el timer.
+  const SKIP_PENALTY = 5;
+  function skipCategory() {
+    if (state.paused || state.remaining <= 0) return;
+    state.roundCategories[state.round - 1] = drawCategory();
+    refreshCategoryActive();
+    // penalización de tiempo
+    state.remaining = Math.max(0, state.remaining - SKIP_PENALTY);
+    updateTimerUI();
+    SFX.penalty();
+    flashTimerPenalty();
+    flashButton('#btn-skip');
+    if (state.remaining <= 0) { SFX.timeup(); endTurn(); }
+  }
+  // breve destello rojo en el timer al penalizar
+  function flashTimerPenalty() {
+    const tp = document.querySelector('.timer-plate');
+    if (!tp) return;
+    tp.classList.remove('penalty'); void tp.offsetWidth; tp.classList.add('penalty');
+  }
+
   // actualiza SOLO el texto de la categoría activa (la de la ronda en curso) con animación
   function refreshCategoryActive() {
     const row = $('#cat-list .cat-row.active');
@@ -393,6 +416,7 @@
     // acciones de juego
     $('#btn-hit').addEventListener('click', () => score(false));
     $('#btn-golden').addEventListener('click', () => score(true));
+    $('#btn-skip').addEventListener('click', () => skipCategory());
     $('#btn-pause').addEventListener('click', () => { SFX.tap(); openPause(); });
     // pausa
     $('#btn-resume').addEventListener('click', () => { SFX.tap(); closePause(); });   // sin música en partida
