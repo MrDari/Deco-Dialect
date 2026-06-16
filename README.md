@@ -1,102 +1,113 @@
-# Deco Dialect
+<div align="center">
 
-Juego de palabras por equipos con estética **Art Deco** (rojo · negro · dorado), reconstruido desde
-cero como app web ultraligera (HTML5 + Canvas + WebAudio puro). De 2 a 20 jugadores, en local.
+# 🎴 DECO DIALECT
 
-**Un solo código → dos destinos:**
-- 🌐 **itch.io / navegador** — los archivos de la raíz se juegan directamente.
-- 🤖 **Google Play (APK/AAB)** — los mismos archivos, empaquetados con **Capacitor** en una app
-  nativa que corre **100 % offline** (no necesita internet ni hospedaje).
+### El juego de palabras por equipos · estética Art Decó · Rojo · Negro · Dorado
+
+[![Plataforma](https://img.shields.io/badge/Plataforma-Web%20%7C%20Android-e23048?style=flat-square)](#)
+[![PWA](https://img.shields.io/badge/PWA-100%25%20offline-e9c270?style=flat-square)](#)
+[![Tamaño](https://img.shields.io/badge/Tama%C3%B1o-~140%20KB-success?style=flat-square)](#)
+[![Idiomas](https://img.shields.io/badge/Idiomas-ES%20%C2%B7%20EN-blue?style=flat-square)](#)
+[![Licencia](https://img.shields.io/badge/Licencia-Propietaria-lightgrey?style=flat-square)](LICENSE)
+
+*Reúne a tus amigos, divídete en equipos y demuestra quién tiene más vocabulario.*
+
+</div>
 
 ---
 
-## Estructura
+## 🎮 ¿Qué es Deco Dialect?
+
+Un **juego de palabras social, rápido y elegante** para jugar en local con amigos y familia.
+Dos o más equipos compiten contra el reloj: aparece una **categoría** y unas **letras**, y hay
+que decir en voz alta una palabra que encaje. Cuantas más aciertes, más puntos. La **letra dorada**
+vale el doble. Sin instalar nada pesado, sin esperas, sin conexión.
+
+> Pensado para reuniones, viajes, clase de idiomas o romper el hielo. De **2 a 20 jugadores**.
+
+---
+
+## ✨ Características
+
+- 🎯 **Partidas dinámicas** — categoría + letras al azar, puntuación en vivo y juego continuo.
+- 🥇 **Letra dorada** — multiplica los puntos y añade tensión a cada turno.
+- ⏱️ **Tres duraciones** — 30 / 60 / 90 s por turno; rondas configurables.
+- 👥 **De 2 a 20 equipos** — con nombres y colores personalizables.
+- 🌐 **Bilingüe** — Español (España) e Inglés, con cientos de combinaciones de categorías.
+- 🎨 **Estética Art Decó Neón** — marco rojo, oro y cartas con brillo, todo dibujado a mano en código.
+- 🔊 **Audio 100 % sintetizado** — música de tensión y efectos generados con WebAudio (cero archivos).
+- 📱 **PWA instalable y offline** — funciona sin internet una vez cargada.
+- 🪶 **Ultraligero** — ~140 KB en total. Carga al instante, no gasta batería.
+
+---
+
+## 🚀 Jugar
+
+| Plataforma | Cómo |
+|---|---|
+| 🌐 **Navegador** | Disponible en itch.io *(próximamente)* — se juega al instante. |
+| 🤖 **Android** | Próximamente en Google Play. |
+| 💻 **Local** | `python -m http.server 9090` → abre `http://localhost:9090` |
+
+> El juego es una app web pura (HTML5 + Canvas + WebAudio), empaquetada con **Capacitor**
+> para Android. El mismo código vale para la web y la tienda.
+
+---
+
+## 🛠️ Para desarrolladores
+
+<details>
+<summary>Estructura del proyecto</summary>
 
 ```
 deco-dialect/
-├─ index.html, css/, js/, icons/, sw.js, manifest.webmanifest   ← el JUEGO (fuente única)
+├─ index.html, css/, js/, fonts/, icons/, sw.js, manifest.webmanifest   ← el JUEGO (fuente única)
 ├─ tools/
-│  ├─ make_icons.py     # genera los iconos
-│  └─ sync-www.js       # copia el juego a www/ para Android
-├─ www/                 # (generado) lo que empaqueta Capacitor — NO editar a mano
-├─ android/             # (generado por Capacitor) proyecto Android Studio
-├─ package.json         # scripts de build
-├─ capacitor.config.json
-└─ twa-manifest.json    # (alternativa TWA, opcional)
+│  ├─ make_icons.py        # genera los iconos web
+│  ├─ make_android_icons.py# genera los iconos Android
+│  ├─ sync-www.js          # copia el juego a www/ para Android
+│  └─ zip-itch.js          # empaqueta el build web para itch.io
+├─ www/                     # (generado) lo que empaqueta Capacitor — NO editar a mano
+├─ android/                 # (generado) proyecto Android Studio / Capacitor
+├─ package.json, capacitor.config.json
+└─ BUILD_AAB.md             # guía para generar el .aab de Google Play
 ```
 
-> Edita siempre los archivos de la **raíz**. `www/` se regenera con `npm run sync:web`.
+> Edita siempre los archivos de la **raíz**. `www/` se regenera con `node tools/sync-www.js`.
 
----
+</details>
 
-## 1) Probar / publicar en la web (itch.io)
+<details>
+<summary>Comandos</summary>
 
-Probar en local (el SW y la PWA requieren http/localhost, no `file://`):
 ```bash
-python -m http.server 9090
-# abre http://localhost:9090
+# Web
+python -m http.server 9090     # servir en local (requiere http, no file://)
+node tools/zip-itch.js         # empaquetar build web para itch.io
+
+# Android (requiere Android SDK — ver BUILD_AAB.md)
+npm install
+npm run cap:sync               # sincroniza el juego al proyecto Android
+npm run android:bundle         # genera el .aab para Google Play
 ```
 
-Subir a **itch.io**: comprime en un ZIP `index.html`, `css/`, `js/`, `icons/`, `sw.js`,
-`manifest.webmanifest`; en itch marca *"This file will be played in the browser"* y como
-*Embed* apunta a `index.html`. Pesa una fracción de un build de Unity y carga al instante.
+</details>
+
+### Tecnología
+HTML5 · Canvas 2D · WebAudio API · CSS puro · JavaScript vanilla (sin frameworks) · Service Worker · Capacitor
 
 ---
 
-## 2) Generar el APK/AAB para Google Play (Capacitor)
+## 📜 Licencia
 
-### Requisitos (una sola vez)
-- **Node.js** ✔ (ya instalado)
-- **JDK 17+** ✔ (tienes JDK 21 en `C:\jdk-21`)
-- **Android SDK** ❗ (falta). La forma más cómoda: instalar **Android Studio**
-  (https://developer.android.com/studio) — trae el SDK y el `gradle` necesarios.
-  Tras instalarlo, define las variables de entorno:
-  ```bash
-  setx JAVA_HOME "C:\jdk-21"
-  setx ANDROID_HOME "%LOCALAPPDATA%\Android\Sdk"
-  ```
+© 2026 **DE IA SOLUTIONS**. Todos los derechos reservados.
 
-### Pasos
-```bash
-cd C:\Workspace\deco-dialect
-npm install                 # instala Capacitor
-
-# crear el proyecto Android la primera vez:
-npx cap add android
-
-# cada vez que cambies el juego:
-npm run cap:sync            # sincroniza www/ y lo copia al proyecto Android
-
-# abrir en Android Studio (recomendado para firmar y exportar):
-npm run android:open
-```
-
-En Android Studio: **Build → Generate Signed Bundle / APK**
-- **AAB** (Android App Bundle) → para subir a Play Store.
-- **APK** → para instalar/probar en un móvil directamente.
-
-La primera vez te pedirá crear un **keystore** (firma). Guárdalo bien: lo necesitas para
-todas las actualizaciones futuras de la app.
-
-> Alternativa por línea de comandos (sin abrir Studio):
-> `npm run android:bundle` genera el `.aab` en `android/app/build/outputs/`.
-
-### Subir a Play Console
-1. Cuenta de desarrollador en [Google Play Console](https://play.google.com/console) (pago único 25 USD).
-2. Crea la app, sube el `.aab`.
-3. Ficha: descripción, capturas de móvil, icono 512×512 (`icons/icon-512.png`),
-   gráfico destacado 1024×500, clasificación de contenido y política de privacidad.
-4. Envía a revisión.
+Este es un proyecto **propietario y comercial**. El código se publica solo con fines de consulta y
+transparencia; **no** se concede permiso para usarlo, copiarlo, modificarlo, redistribuirlo ni
+comercializarlo. Consulta el archivo [LICENSE](LICENSE) para los términos completos.
 
 ---
 
-## Personalización rápida
-- **Categorías / palabras**: `js/data.js`
-- **Textos de interfaz**: `js/i18n.js` (Español e Inglés)
-- **Colores / estética**: variables CSS al inicio de `css/style.css`
-- **Iconos**: `python tools/make_icons.py`
-- **ID de la app / nombre**: `capacitor.config.json`
-
-## Por qué esta versión es mejor que el build Unity original
-Peso ~45 KB de código (vs. varios MB), carga instantánea, audio sintetizado (0 archivos),
-funciona offline, instalable, bajo consumo de batería, y el **mismo código vale para web y Android**.
+<div align="center">
+<sub>Hecho con ❤️ por DE IA SOLUTIONS</sub>
+</div>
