@@ -229,25 +229,26 @@
     return el;
   }
 
-  // Acierto: renueva las letras del tipo correspondiente y suma
+  // renueva la CARTA DE LETRAS COMPLETA (las 3, sin repetir entre sí) con animación
+  function renewAllLetters() {
+    const used = new Set();
+    [0, 1, 2].forEach(k => {
+      let c, g = 0; do { c = randLetter(); } while (used.has(c) && g++ < 50);
+      used.add(c); state.cards[k].ch = c; refreshCard(k);
+    });
+  }
+  // Acierto: ambos tipos renuevan las 3 letras; la dorada además cambia la categoría.
   function score(gold) {
     if (state.paused || state.remaining <= 0) return;
+    renewAllLetters();
     if (gold) {
       state.turnPoints += 2;
-      state.cards[2].ch = randLetter();
-      refreshCard(2);
       // la dorada también renueva la CATEGORÍA activa por otra nueva (sin repetir)
       state.roundCategories[state.round - 1] = drawCategory();
       refreshCategoryActive();
       SFX.gold();
     } else {
       state.turnPoints += 1;
-      // el acierto normal renueva la CARTA DE LETRAS COMPLETA (las 3, incluida la dorada)
-      const used = new Set();
-      [0, 1, 2].forEach(k => {
-        let c, g = 0; do { c = randLetter(); } while (used.has(c) && g++ < 50);
-        used.add(c); state.cards[k].ch = c; refreshCard(k);
-      });
       SFX.score();
     }
     updateScorebarLive();
