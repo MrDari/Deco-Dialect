@@ -20,7 +20,7 @@ python -m http.server 9090      # (el 8080 lo necesita el usuario, NO usarlo)
 ```
 - **IMPORTANTE — service worker**: cada cambio sube la versión de caché en `sw.js`
   (`deco-dialect-vN`). Para ver cambios hay que **recarga dura** (Ctrl+Shift+R) o
-  cerrar/reabrir en móvil. Versión actual del SW: **v16**.
+  cerrar/reabrir en móvil. Versión actual del SW: **v17**.
 - **Audio**: arranca con el PRIMER gesto del usuario (toque/click) — los navegadores
   bloquean audio sin interacción. El botón ♪ (menú, arriba izq.) activa/desactiva.
 

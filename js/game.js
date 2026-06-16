@@ -21,6 +21,7 @@
     turnPoints: 0,
     timer: null, remaining: 0, paused: false,
     roundCategories: [],
+    catDeck: [], catPtr: 0,   // mazo barajado de categorías (sin repetición)
     cards: []   // 3 cartas: [normal, normal, gold]
   };
 
@@ -112,11 +113,26 @@
       { ch: pick(), gold: true,  scored: false }
     ];
   }
+  // Mazo de categorías barajado con puntero: cada categoría sale una vez hasta
+  // agotar todas (90), evitando repeticiones aunque se acierten muchas doradas.
+  function catList() { return window.CATEGORIES[state.lang] || window.CATEGORIES['es-ES']; }
+  function resetCatDeck() { state.catDeck = shuffle(catList()); state.catPtr = 0; }
+  function drawCategory() {
+    if (!state.catDeck || !state.catDeck.length) resetCatDeck();
+    // si se agotó el mazo, rebaraja para seguir sin cortes
+    if (state.catPtr >= state.catDeck.length) {
+      const last = state.catDeck[state.catDeck.length - 1];
+      let deck = shuffle(catList());
+      // evita que la primera del nuevo mazo repita la última mostrada
+      if (deck.length > 1 && deck[0] === last) { const j = 1 + Math.floor(Math.random() * (deck.length - 1)); [deck[0], deck[j]] = [deck[j], deck[0]]; }
+      state.catDeck = deck; state.catPtr = 0;
+    }
+    return state.catDeck[state.catPtr++];
+  }
   function pickRoundCategories() {
-    const list = window.CATEGORIES[state.lang] || window.CATEGORIES['es-ES'];
-    const picked = shuffle(list).slice(0, state.rounds);
-    // si rondas > categorías disponibles, rellena reciclando
-    while (picked.length < state.rounds) picked.push(list[picked.length % list.length]);
+    resetCatDeck();
+    const picked = [];
+    for (let i = 0; i < state.rounds; i++) picked.push(drawCategory());
     return picked;
   }
 
@@ -220,6 +236,9 @@
       state.turnPoints += 2;
       state.cards[2].ch = randLetter();
       refreshCard(2);
+      // la dorada también renueva la CATEGORÍA activa por otra nueva (sin repetir)
+      state.roundCategories[state.round - 1] = drawCategory();
+      refreshCategoryActive();
       SFX.gold();
     } else {
       state.turnPoints += 1;
@@ -232,6 +251,14 @@
     }
     updateScorebarLive();
     flashButton(gold ? '#btn-golden' : '#btn-hit');
+  }
+  // actualiza SOLO el texto de la categoría activa (la de la ronda en curso) con animación
+  function refreshCategoryActive() {
+    const row = $('#cat-list .cat-row.active');
+    if (!row) return;
+    const txt = row.querySelector('.cat-text');
+    if (txt) txt.textContent = state.roundCategories[state.round - 1];
+    row.classList.remove('dealt'); void row.offsetWidth; row.classList.add('dealt');
   }
   // actualiza SOLO la letra de una carta + breve animación de reparto (sin re-render global)
   function refreshCard(i) {

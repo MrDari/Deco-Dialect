@@ -510,6 +510,9 @@ h1, h2 { font-weight: 600; }
 /* una carta recién repartida hace un breve flip-in */
 @keyframes deal { from{opacity:0; transform:rotateY(38deg) scale(.9)} to{opacity:1; transform:none} }
 .card.dealt { animation: deal .22s ease; }
+/* categoría renovada (al acertar dorada): breve destello + entrada lateral */
+@keyframes cat-deal { 0%{opacity:0; transform:translateX(14px)} 100%{opacity:1; transform:none} }
+.cat-row.dealt { animation: cat-deal .24s ease; }
 
 @media (min-width: 720px) and (pointer: fine) {
   .btn:hover { border-color: var(--gold); }

@@ -13,7 +13,17 @@ window.CATEGORIES = {
     'Apps y webs', 'Capitales', 'Cosas que dan miedo',
     'Cócteles', 'Cosas que flotan', 'Algo amarillo', 'Material de oficina',
     'Personajes de Marvel', 'Videojuegos', 'Personajes de dibujos', 'Superpoderes',
-    'Cosas del espacio', 'Cosas blandas'
+    'Cosas del espacio', 'Cosas blandas',
+    'Cosas verdes', 'Cosas caras', 'Cosas pesadas', 'Cosas ruidosas', 'Cosas pequeñas',
+    'Cosas duras', 'Cosas pegajosas', 'Cosas brillantes', 'Cosas peligrosas', 'Cosas viejas',
+    'Animales marinos', 'Insectos', 'Aves', 'Razas de perro', 'Dinosaurios',
+    'Postres', 'Verduras', 'Especias', 'Tipos de pan', 'Quesos',
+    'Herramientas', 'Muebles', 'Electrodomésticos', 'Juguetes', 'Joyas',
+    'Idiomas', 'Ríos', 'Montañas', 'Islas', 'Continentes',
+    'Planetas y estrellas', 'Elementos químicos', 'Partes de un coche', 'Tipos de baile', 'Géneros musicales',
+    'Series de TV', 'Dibujos animados', 'Villanos', 'Superhéroes', 'Princesas Disney',
+    'Cosas en un parque', 'Cosas del cole', 'Cosas del baño', 'Cosas del hospital', 'Cosas de un avión',
+    'Profesiones peligrosas', 'Deportes de equipo', 'Cosas que se reciclan', 'Materiales', 'Sentimientos'
   ],
   'en': [
     'Animals', 'Fruits & veggies', 'Countries', 'Cities', 'First names',
@@ -25,7 +35,17 @@ window.CATEGORIES = {
     'Apps & websites', 'Capitals', 'Scary things',
     'Cocktails', 'Things that float', 'Something yellow', 'Office supplies',
     'Marvel characters', 'Video games', 'Cartoon characters', 'Superpowers',
-    'Things in space', 'Things that are soft'
+    'Things in space', 'Things that are soft',
+    'Green things', 'Expensive things', 'Heavy things', 'Loud things', 'Small things',
+    'Hard things', 'Sticky things', 'Shiny things', 'Dangerous things', 'Old things',
+    'Sea animals', 'Insects', 'Birds', 'Dog breeds', 'Dinosaurs',
+    'Desserts', 'Vegetables', 'Spices', 'Types of bread', 'Cheeses',
+    'Tools', 'Furniture', 'Appliances', 'Toys', 'Jewelry',
+    'Languages', 'Rivers', 'Mountains', 'Islands', 'Continents',
+    'Planets & stars', 'Chemical elements', 'Car parts', 'Dance styles', 'Music genres',
+    'TV series', 'Cartoons', 'Villains', 'Superheroes', 'Disney princesses',
+    'Things in a park', 'Things at school', 'Things in a bathroom', 'Things in a hospital', 'Things on a plane',
+    'Dangerous jobs', 'Team sports', 'Recyclable things', 'Materials', 'Feelings'
   ]
 };
 
