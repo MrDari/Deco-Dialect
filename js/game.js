@@ -283,7 +283,9 @@
     updateTimerUI();
     SFX.penalty();
     flashTimerPenalty();
-    flashButton('#btn-skip');
+    // destello del botón saltar SIN transform (no mover: está centrado con translateY)
+    const sb = $('#btn-skip');
+    if (sb) { sb.classList.remove('flash'); void sb.offsetWidth; sb.classList.add('flash'); }
     if (state.remaining <= 0) { SFX.timeup(); endTurn(); }
   }
   // breve destello rojo en el timer al penalizar
@@ -308,7 +310,6 @@
     el.querySelector('.card-letter').textContent = state.cards[i].ch;
     el.classList.remove('dealt'); void el.offsetWidth; el.classList.add('dealt');
   }
-  function flashButton(sel) { const b = $(sel); b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); }
 
   // ---------- Timer ----------
   function fmt(s) { const m = Math.floor(s / 60); const r = s % 60; return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`; }

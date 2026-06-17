@@ -273,16 +273,16 @@ h1, h2 { font-weight: 600; }
   height: 100%; padding-top: calc(12px + var(--safe-t)); padding-bottom: calc(12px + var(--safe-b));
 }
 
-.play-top { width: 100%; display: flex; justify-content: space-between; gap: 12px; flex: 0 0 auto; }
+.play-top { width: 100%; display: flex; justify-content: center; gap: 12px; flex: 0 0 auto; }
+/* placa RONDA: ahora va sola y discreta, sin borde/glow rojo que choque con el
+   marco exterior. Solo una pastilla neutra centrada. */
 .plate {
-  flex: 1; text-align: center; padding: 10px 8px;
-  border: 1px solid #e2304866; border-radius: 10px;
-  font-family: 'Cinzel', serif; font-size: 15px; letter-spacing: 1px; color: var(--ink);
-  background: linear-gradient(180deg, #e2304818, var(--panel));
-  box-shadow: 0 0 10px -2px #e2304844, inset 0 0 10px #e2304811;
+  text-align: center; padding: 7px 22px;
+  border: 1px solid var(--line-soft); border-radius: 999px;
+  font-family: 'Cinzel', serif; font-size: 14px; letter-spacing: 1px; color: var(--ink);
+  background: var(--panel);
 }
 .plate-label { color: var(--ink-dim); font-size: 12px; letter-spacing: 2px; }
-#plate-turn span#hud-team-name { color: var(--gold-2); font-weight: 700; }
 
 .timer-plate {
   font-family: 'Cinzel', serif; font-size: 34px; font-weight: 700;
@@ -364,11 +364,20 @@ h1, h2 { font-weight: 600; }
   font-size: 11px; text-transform: uppercase; color: #fff; cursor: pointer;
   padding: 4px 9px; border-radius: 999px;
   border: 1px solid #ffffff66; background: #00000040;
-  transition: transform .08s, background .2s, opacity .2s;
+  transition: background .2s, opacity .2s;
 }
 .skip-btn .skip-pen { font-size: 10px; color: #ffd2d8; font-weight: 700; }
-.skip-btn:active { transform: translateY(-50%) scale(.92); }
+/* el feedback de pulsación va en el CONTENIDO interior, no en el botón posicionado
+   (así no pelea con el translateY del centrado y no "salta") */
+.skip-btn > span { transition: transform .08s; display: inline-block; }
+.skip-btn:active > span { transform: scale(.9); }
 .skip-btn:disabled { opacity: .4; pointer-events: none; }
+/* destello al saltar (solo fondo/glow, sin transform para no descentrar) */
+@keyframes skip-flash {
+  0%   { background: #ffffff40; box-shadow: 0 0 14px 2px #ffffff66; }
+  100% { background: #00000040; box-shadow: none; }
+}
+.skip-btn.flash { animation: skip-flash .4s ease; }
 /* el título queda centrado pese al botón a la derecha */
 .panel-head-cats > span:first-child { padding: 0 76px; }
 
