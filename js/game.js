@@ -160,7 +160,6 @@
     state.cards = buildCards();
 
     $('#hud-round').textContent = state.round;
-    $('#hud-team-name').textContent = teamName(state.current);
 
     renderCategoryCard();
     renderCards();
@@ -180,9 +179,19 @@
 
   function renderScorebar() {
     const bar = $('#scorebar'); bar.innerHTML = '';
-    // muestra hasta 4 equipos en la barra para no saturar; resto en resumen
-    const show = Math.min(state.teams, 4);
-    for (let i = 0; i < show; i++) {
+    // muestra hasta 4 equipos en la barra; el equipo en turno SIEMPRE se ve
+    // (el chip activo es ahora el único indicador de "a quién le toca").
+    const max = 4;
+    let idxs;
+    if (state.teams <= max) {
+      idxs = [...Array(state.teams).keys()];
+    } else {
+      // ventana que mantiene visible al equipo actual
+      let startAt = Math.min(state.current, state.teams - max);
+      idxs = [];
+      for (let k = 0; k < max; k++) idxs.push(startAt + k);
+    }
+    idxs.forEach(i => {
       const chip = document.createElement('div');
       chip.className = 'score-chip' + (i === state.current ? ' active' : '');
       const live = i === state.current ? state.scores[i] + state.turnPoints : state.scores[i];
@@ -191,7 +200,7 @@
         `<span>${teamName(i)}</span>` +
         `<span class="chip-pts">${live}</span>`;
       bar.appendChild(chip);
-    }
+    });
   }
   function updateScorebarLive() {
     const chip = $('#scorebar .score-chip.active .chip-pts');
@@ -237,9 +246,12 @@
       used.add(c); state.cards[k].ch = c; refreshCard(k);
     });
   }
-  // Acierto: ambos tipos renuevan las 3 letras; la dorada además cambia la categoría.
-  function score(gold) {
+  // Acierto: se toca la CARTA de la letra acertada. Ambos tipos renuevan las 3
+  // letras; la dorada (+2) además cambia la categoría. La normal suma +1.
+  function scoreCard(i) {
     if (state.paused || state.remaining <= 0) return;
+    const gold = !!state.cards[i].gold;
+    flashScore(i);   // destello en la carta tocada ANTES de renovar las letras
     renewAllLetters();
     if (gold) {
       state.turnPoints += 2;
@@ -252,7 +264,12 @@
       SFX.score();
     }
     updateScorebarLive();
-    flashButton(gold ? '#btn-golden' : '#btn-hit');
+  }
+  // breve destello de acierto en la carta tocada
+  function flashScore(i) {
+    const el = $(`#cards-area .card[data-idx="${i}"]`);
+    if (!el) return;
+    el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit');
   }
   // Saltar categoría: cuando no sabes la categoría, la cambias por otra nueva
   // a cambio de una PENALIZACIÓN de 5 segundos en el timer.
@@ -414,9 +431,12 @@
     $('#btn-start').addEventListener('click', () => startGame());
     // turno
     $('#btn-go').addEventListener('click', () => beginTurn());
-    // acciones de juego
-    $('#btn-hit').addEventListener('click', () => score(false));
-    $('#btn-golden').addEventListener('click', () => score(true));
+    // acciones de juego: se acierta TOCANDO la carta de la letra
+    $('#cards-area').addEventListener('click', e => {
+      const card = e.target.closest('.card');
+      if (!card) return;
+      scoreCard(+card.dataset.idx);
+    });
     $('#btn-skip').addEventListener('click', () => skipCategory());
     $('#btn-pause').addEventListener('click', () => { SFX.tap(); openPause(); });
     // pausa

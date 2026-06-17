@@ -65,22 +65,22 @@ h1, h2 { font-weight: 600; }
 #deco-frame {
   position: fixed; z-index: 2; pointer-events: none;
   inset: calc(6px + var(--safe-t)) 6px calc(6px + var(--safe-b)) 6px;
-  border: 2px solid var(--red);
+  border: 1px solid #e2304855;
   border-radius: 14px;
   box-shadow:
-    0 0 10px #e2304877, 0 0 22px #e2304844,
-    inset 0 0 12px #e2304833, inset 0 0 2px #ff5a6a99;
+    0 0 6px #e2304833,
+    inset 0 0 8px #e2304818;
 }
-/* doble filete interior (fino, rojo tenue) */
+/* doble filete interior (fino, rojo muy tenue) */
 #deco-frame::before {
   content: ""; position: absolute; inset: 6px;
-  border: 1px solid #e2304855; border-radius: 9px;
+  border: 1px solid #e2304826; border-radius: 9px;
 }
 /* ornamento Art Deco en cada esquina: dos trazos en ángulo */
 #deco-frame .dc {
-  position: absolute; width: 34px; height: 34px;
-  border-color: var(--gold); border-style: solid; border-width: 0;
-  filter: drop-shadow(0 0 4px #e9c27066);
+  position: absolute; width: 30px; height: 30px;
+  border-color: #e9c270aa; border-style: solid; border-width: 0;
+  filter: drop-shadow(0 0 3px #e9c27040);
 }
 #deco-frame .dc-tl { top: 9px;    left: 9px;    border-top-width: 2px; border-left-width: 2px;  border-top-left-radius: 8px; }
 #deco-frame .dc-tr { top: 9px;    right: 9px;   border-top-width: 2px; border-right-width: 2px; border-top-right-radius: 8px; }
@@ -322,7 +322,13 @@ h1, h2 { font-weight: 600; }
   padding: 8px; border: 1px solid var(--line-soft); border-radius: 10px;
   font-size: 15px; background: var(--panel);
 }
-.score-chip.active { border-color: var(--gold); background: #e9c27012; }
+/* chip activo = ÚNICO indicador de turno → más marcado (borde dorado + glow) */
+.score-chip.active {
+  border-color: var(--gold); background: #e9c2701f;
+  box-shadow: 0 0 12px -2px #e9c27066, inset 0 0 8px #e9c27014;
+  font-weight: 700;
+}
+.score-chip.active .chip-dot { box-shadow: 0 0 8px currentColor; }
 .score-chip .chip-dot { width: 10px; height: 10px; border-radius: 50%; }
 .score-chip .chip-pts { font-weight: 700; color: var(--gold-2); }
 
@@ -365,6 +371,14 @@ h1, h2 { font-weight: 600; }
 .skip-btn:disabled { opacity: .4; pointer-events: none; }
 /* el título queda centrado pese al botón a la derecha */
 .panel-head-cats > span:first-child { padding: 0 76px; }
+
+/* cabecera de LETRA con pista "toca la letra acertada" debajo del título */
+.panel-head-letters { display: flex; flex-direction: column; gap: 2px; padding-top: 8px; padding-bottom: 8px; }
+.panel-head-letters .tap-hint {
+  font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spacing: .5px;
+  font-size: 11px; text-transform: none; color: #ffffffcc;
+  text-shadow: none;
+}
 
 /* categorías — pastillas con el mismo estilo que las cartas.
    flex: 1 1 0 + min-height: 0 => las filas se reparten SIEMPRE el alto del panel,
@@ -487,12 +501,10 @@ h1, h2 { font-weight: 600; }
 }
 .action-btn:active { transform: scale(.95); }
 .action-btn .badge { font-weight: 700; padding: 2px 7px; border-radius: 999px; font-size: 12px; }
-.action-btn.hit { border-color: var(--red); color: #ffccd2; }
-.action-btn.hit .badge { background: var(--red); color: #fff; }
-.action-btn.golden { border-color: var(--gold); color: var(--gold-2); }
-.action-btn.golden .badge { background: var(--gold); color: #2a1c00; }
-.action-btn.menu { flex: 0 0 84px; color: var(--gold-2); }
+/* el acierto ya no usa botones: se toca la carta. Solo queda MENÚ (centrado). */
+.action-btn.menu { flex: 0 0 auto; min-width: 140px; color: var(--gold-2); }
 .action-btn:disabled { opacity: .3; pointer-events: none; }
+.play-bottom { justify-content: center; }
 
 /* ---------- Carteles de fin de turno / ronda ---------- */
 .sum-banner {
@@ -544,6 +556,19 @@ h1, h2 { font-weight: 600; }
 /* una carta recién repartida hace un breve flip-in */
 @keyframes deal { from{opacity:0; transform:rotateY(38deg) scale(.9)} to{opacity:1; transform:none} }
 .card.dealt { animation: deal .22s ease; }
+/* destello de ACIERTO al tocar la carta (verde para normal, dorado para la dorada) */
+@keyframes card-hit {
+  0%   { transform: scale(1); box-shadow: 0 0 0 0 #29c46e00; }
+  35%  { transform: scale(1.06); box-shadow: 0 0 18px 2px #29c46eaa; }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 #29c46e00; }
+}
+@keyframes card-hit-gold {
+  0%   { transform: scale(1); box-shadow: 0 0 0 0 #e9c27000; }
+  35%  { transform: scale(1.06); box-shadow: 0 0 22px 3px #e9c270cc; }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 #e9c27000; }
+}
+.card.hit { animation: card-hit .34s ease; }
+.card.gold.hit { animation: card-hit-gold .34s ease; }
 /* categoría renovada (al acertar dorada): voltea como una carta + destello dorado */
 @keyframes cat-deal {
   0%   { opacity: 0; transform: perspective(500px) rotateX(-82deg); transform-origin: top center; }

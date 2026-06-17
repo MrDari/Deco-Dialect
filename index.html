@@ -146,7 +146,6 @@
     <!-- ====================== JUEGO ====================== -->
     <section class="screen" id="screen-play">
       <div class="play-top">
-        <div class="plate" id="plate-turn"><span class="plate-label" data-i18n="turn">TURNO</span>: <span id="hud-team-name">A</span></div>
         <div class="plate" id="plate-round"><span class="plate-label" data-i18n="round">RONDA</span>: <span id="hud-round">1</span></div>
       </div>
 
@@ -170,14 +169,15 @@
 
       <!-- Panel letras -->
       <div class="panel panel-letters">
-        <div class="panel-head" data-i18n="letterHead">LETRA</div>
+        <div class="panel-head panel-head-letters">
+          <span data-i18n="letterHead">LETRA</span>
+          <span class="tap-hint" data-i18n="tapHint">Toca la letra acertada</span>
+        </div>
         <div class="panel-body cards-body" id="cards-area"></div>
       </div>
 
       <div class="play-bottom">
-        <button class="action-btn hit" id="btn-hit"><span data-i18n="hit">¡Acierto!</span> <span class="badge">+1</span></button>
         <button class="action-btn menu" id="btn-pause" data-i18n="menu">MENÚ</button>
-        <button class="action-btn golden" id="btn-golden"><span data-i18n="goldenHit">¡Dorada!</span> <span class="badge">+2</span></button>
       </div>
     </section>
 

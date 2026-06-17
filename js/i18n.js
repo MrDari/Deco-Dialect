@@ -8,6 +8,7 @@ window.I18N = {
     back: 'VOLVER', start: 'EMPEZAR',
     round: 'RONDA', turn: 'TURNO', getReady: '¡Preparados!', go: '¡A JUGAR!',
     categoryHead: 'CATEGORÍA', letterHead: 'LETRA', pts: 'pts',
+    tapHint: 'Toca la letra acertada',
     hit: '¡Acierto!', goldenHit: '¡Dorada!', menu: 'MENÚ', skip: 'Saltar',
     turnScore: 'Puntuación del turno', next: 'CONTINUAR',
     endTurnBanner: 'FIN DEL TURNO', endRoundBanner: 'FIN DE LA RONDA',
@@ -17,8 +18,8 @@ window.I18N = {
     rules: [
       'Por turnos, cada <b>equipo</b> ve una <b>categoría</b> (la resaltada) y tres <b>cartas de letra</b> (dos normales y una <b>dorada</b>).',
       'Antes de que acabe el tiempo, deben <b>decir una palabra</b> de esa categoría que empiece por una de las letras.',
-      '<b>¡Acierto! (+1)</b> con una letra normal: suma 1 punto y salen <b>tres letras nuevas</b>.',
-      '<b>¡Dorada! (+2)</b> con la letra dorada: suma 2 puntos y además <b>cambia la categoría</b> por otra nueva.',
+      'Cuando acierten, <b>tocan la carta</b> de esa letra: si es normal suma <b>+1</b> punto; si es la <b>dorada</b> suma <b>+2</b>. En ambos casos salen <b>tres letras nuevas</b>.',
+      'Al tocar la <b>dorada (+2)</b> además <b>cambia la categoría</b> por otra nueva.',
       '¿No sabes la categoría? Pulsa <b>Saltar</b> para cambiarla, pero pierdes <b>5 segundos</b> del tiempo.',
       'Gana el equipo con <b>más puntos</b> tras todas las rondas.'
     ]
@@ -31,6 +32,7 @@ window.I18N = {
     back: 'BACK', start: 'START',
     round: 'ROUND', turn: 'TURN', getReady: 'Get ready!', go: "LET'S GO!",
     categoryHead: 'CATEGORY', letterHead: 'LETTER', pts: 'pts',
+    tapHint: 'Tap the correct letter',
     hit: 'Hit!', goldenHit: 'Golden!', menu: 'MENU', skip: 'Skip',
     turnScore: 'Turn score', next: 'CONTINUE',
     endTurnBanner: 'END OF TURN', endRoundBanner: 'END OF ROUND',
@@ -40,8 +42,8 @@ window.I18N = {
     rules: [
       'In turns, each <b>team</b> sees a <b>category</b> (the highlighted one) and three <b>letter cards</b> (two normal, one <b>golden</b>).',
       'Before time runs out, they must <b>say a word</b> from that category starting with one of the letters.',
-      '<b>Hit! (+1)</b> with a normal letter: scores 1 point and <b>three new letters</b> appear.',
-      '<b>Golden! (+2)</b> with the golden letter: scores 2 points and also <b>changes the category</b> to a new one.',
+      'When they get it right, they <b>tap the card</b> for that letter: a normal one scores <b>+1</b>, the <b>golden</b> one scores <b>+2</b>. Either way, <b>three new letters</b> appear.',
+      'Tapping the <b>golden (+2)</b> card also <b>changes the category</b> to a new one.',
       "Don't know the category? Tap <b>Skip</b> to change it, but you lose <b>5 seconds</b> of time.",
       'The team with the <b>most points</b> after all rounds wins.'
     ]
