@@ -105,7 +105,7 @@ Google exige una URL pública de política de privacidad.
 | | Gratis | Premium (comprado) |
 |---|---|---|
 | Categorías | **15** (de 90) | **90** |
-| Equipos | **2** | hasta **20** |
+| Equipos | **2** | hasta **5** |
 | Rondas | **3** | hasta **20** |
 
 - En **web/itch.io** no hay límites (no hay tienda): la versión navegador es completa.
@@ -134,14 +134,14 @@ Versión completa
 
 **Descripción** (Description):
 ```
-Desbloquea para siempre las 90 categorías, hasta 20 equipos y hasta 20 rondas por partida. Pago único, sin anuncios y sin conexión.
+Desbloquea para siempre las 90 categorías, hasta 5 equipos y hasta 20 rondas por partida. Pago único, sin anuncios y sin conexión.
 ```
 
 **Precio:** `1,99 €`
 
 > Versión en inglés (si añades la traducción del producto):
 > - Name: `Full version`
-> - Description: `Unlock all 90 categories, up to 20 teams and up to 20 rounds per game, forever. One-time purchase, no ads, works offline.`
+> - Description: `Unlock all 90 categories, up to 5 teams and up to 20 rounds per game, forever. One-time purchase, no ads, works offline.`
 
 ---
 
@@ -179,7 +179,7 @@ Desbloquea para siempre las 90 categorías, hasta 20 equipos y hasta 20 rondas p
 2. Añade tu email de Google a la lista de testers de licencias.
 3. Instala la versión de prueba en tu móvil, pulsa **Desbloquear** y comprueba:
    - Se abre el diálogo de pago de Google.
-   - Tras "comprar" (de prueba), se activan las 90 categorías / 20 equipos / 20 rondas.
+   - Tras "comprar" (de prueba), se activan las 90 categorías / 5 equipos / 20 rondas.
    - Cierra y reabre: sigue premium (cacheado).
    - Reinstala y pulsa **"Restaurar compra"**: recupera el premium.
 

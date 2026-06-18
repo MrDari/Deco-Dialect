@@ -29,7 +29,8 @@
   // En Android sin compra: 15 categorías, 2 equipos, 3 rondas. Premium = sin límites.
   // En web (itch.io) Billing.isPremium() es true → sin límites.
   const FREE = { cats: 15, teams: 2, rounds: 3 };
-  const MAX = { teams: 20, rounds: 20 };
+  const MAX = { teams: 5, rounds: 20 };   // 5 equipos = los que caben en pantalla
+  const CAT_PAGE = 5;                       // la carta de categorías muestra 5 como máximo
   const isPremium = () => window.Billing ? window.Billing.isPremium() : true;
   const maxTeams  = () => isPremium() ? MAX.teams  : FREE.teams;
   const maxRounds = () => isPremium() ? MAX.rounds : FREE.rounds;
@@ -202,18 +203,8 @@
 
   function renderScorebar() {
     const bar = $('#scorebar'); bar.innerHTML = '';
-    // muestra hasta 4 equipos en la barra; el equipo en turno SIEMPRE se ve
-    // (el chip activo es ahora el único indicador de "a quién le toca").
-    const max = 4;
-    let idxs;
-    if (state.teams <= max) {
-      idxs = [...Array(state.teams).keys()];
-    } else {
-      // ventana que mantiene visible al equipo actual
-      let startAt = Math.min(state.current, state.teams - max);
-      idxs = [];
-      for (let k = 0; k < max; k++) idxs.push(startAt + k);
-    }
+    // máximo 5 equipos (caben todos en la barra). El chip activo es el indicador de turno.
+    const idxs = [...Array(state.teams).keys()];
     idxs.forEach(i => {
       const chip = document.createElement('div');
       chip.className = 'score-chip' + (i === state.current ? ' active' : '');
@@ -230,13 +221,18 @@
     if (chip) chip.textContent = state.scores[state.current] + state.turnPoints;
   }
 
+  // La carta de categorías muestra como MÁXIMO 5 filas. Si hay más rondas, se pagina:
+  // rondas 1-5 en la primera carta, 6-10 en la siguiente, etc. La página visible es
+  // siempre la que contiene la ronda en curso, numerada 1..5 desde su inicio.
   function renderCategoryCard() {
     const box = $('#cat-list'); box.innerHTML = '';
-    state.roundCategories.forEach((cat, i) => {
-      const r = i + 1;
+    const pageStart = Math.floor((state.round - 1) / CAT_PAGE) * CAT_PAGE;
+    const page = state.roundCategories.slice(pageStart, pageStart + CAT_PAGE);
+    page.forEach((cat, i) => {
+      const r = pageStart + i + 1;     // ronda real (para done/active)
       const row = document.createElement('div');
       row.className = 'cat-row' + (r < state.round ? ' done' : r === state.round ? ' active' : '');
-      row.innerHTML = `<span class="cat-idx">${r}</span><span class="cat-text">${cat}</span>`;
+      row.innerHTML = `<span class="cat-idx">${i + 1}</span><span class="cat-text">${cat}</span>`;
       box.appendChild(row);
     });
   }
@@ -449,12 +445,6 @@
     // si la compra ya constaba al volver (caso raro), onChange no saltará: cerramos aquí
     if (isPremium()) onUnlocked();
   }
-  async function doRestore() {
-    if (!window.Billing) return;
-    SFX.tap();
-    await window.Billing.restore();
-    if (isPremium()) onUnlocked();
-  }
   // Al activarse premium: cierra modal, oculta candados y refresca la UI de setup.
   // Idempotente: si el modal ya está cerrado no hace nada visible de más.
   function onUnlocked() {
@@ -510,7 +500,6 @@
     // desbloqueo (compra)
     $('#btn-unlock-menu').addEventListener('click', () => { SFX.tap(); openUnlock(); });
     $('#btn-unlock-buy').addEventListener('click', doPurchase);
-    $('#btn-unlock-restore').addEventListener('click', doRestore);
     $('#btn-unlock-close').addEventListener('click', () => { SFX.tap(); closeUnlock(); });
     $('#modal-unlock').addEventListener('click', e => { if (e.target.id === 'modal-unlock') closeUnlock(); });
     // pausa

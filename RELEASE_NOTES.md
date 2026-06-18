@@ -7,21 +7,24 @@
 
 ---
 
-## v1.5 — versionCode 7 (actual)
+## v1.6 — versionCode 8 (actual)
 
 **Español (es-ES):**
 ```
-¡Ahora gratis! Juega sin coste con 15 categorías y partidas de 2 equipos y 3 rondas. Desbloquea la versión completa con un único pago: las 90 categorías, hasta 20 equipos y 20 rondas. Además, mejor ajuste a la pantalla en todos los móviles. ¡Gracias por jugar!
+¡Ahora gratis! Juega sin coste con 15 categorías y partidas de 2 equipos y 3 rondas. Desbloquea la versión completa con un único pago: las 90 categorías, hasta 5 equipos y 20 rondas. Diseño renovado, más limpio y elegante. ¡Gracias por jugar!
 ```
 
 **English (en-US):**
 ```
-Now free! Play at no cost with 15 categories and games of 2 teams and 3 rounds. Unlock the full version with a single purchase: all 90 categories, up to 20 teams and 20 rounds. Plus, better screen fit on all phones. Thanks for playing!
+Now free! Play at no cost with 15 categories and games of 2 teams and 3 rounds. Unlock the full version with a single purchase: all 90 categories, up to 5 teams and 20 rounds. Refreshed, cleaner and more elegant design. Thanks for playing!
 ```
 
 ---
 
 ## Historial (por si necesitas reusar texto)
+
+### v1.5 — versionCode 7
+- Arreglo: el modal de compra se cierra solo al confirmarse (era asíncrono).
 
 ### v1.4 — versionCode 6
 - Modelo gratis + desbloqueo único (compra `unlock_full`).

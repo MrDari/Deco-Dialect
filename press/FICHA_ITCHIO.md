@@ -57,7 +57,7 @@ neón** en rojo, negro y oro.
 - 🎯 Partidas dinámicas: categoría + letras al azar y juego continuo.
 - 🥇 Letra dorada que multiplica los puntos.
 - ⏱️ Tres duraciones por turno (30 / 60 / 90 s) y rondas configurables.
-- 👥 De 2 a 20 equipos, con nombres y colores propios.
+- 👥 De 2 a 5 equipos, con nombres y colores propios.
 - 🌐 Bilingüe: Español e Inglés.
 - 🎨 Estética Art Déco neón dibujada a mano en código.
 - 🔊 Música y efectos 100 % sintetizados.
@@ -93,5 +93,5 @@ A **category** and some **letters** appear: shout out a matching word before tim
 The more you nail, the more points you score — and watch out for the **golden letter**, worth
 double! A fast, elegant, no-fuss party game wrapped in a neon **Art Déco** look.
 
-**Features:** dynamic rounds · golden letter (x2) · 30/60/90s turns · 2–20 teams ·
+**Features:** dynamic rounds · golden letter (x2) · 30/60/90s turns · 2–5 teams ·
 bilingual EN/ES · hand-coded Art Déco style · fully synthesized audio · works offline.
