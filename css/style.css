@@ -37,8 +37,13 @@
   --ok:        #e9c270;
   --r:         16px;
   --tap:       54px;
+  /* Areas seguras. En web/iOS se resuelven con env(); en Android la capa nativa
+     (MainActivity) sobreescribe estas variables con los insets REALES del sistema,
+     incluida la barra de navegacion — algo que env(safe-area-inset-*) no reporta. */
   --safe-t:    env(safe-area-inset-top, 0px);
+  --safe-r:    env(safe-area-inset-right, 0px);
   --safe-b:    env(safe-area-inset-bottom, 0px);
+  --safe-l:    env(safe-area-inset-left, 0px);
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; }
