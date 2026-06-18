@@ -25,6 +25,15 @@
     cards: []   // 3 cartas: [normal, normal, gold]
   };
 
+  // ---------- Freemium (límites de la versión gratuita) ----------
+  // En Android sin compra: 15 categorías, 2 equipos, 3 rondas. Premium = sin límites.
+  // En web (itch.io) Billing.isPremium() es true → sin límites.
+  const FREE = { cats: 15, teams: 2, rounds: 3 };
+  const MAX = { teams: 20, rounds: 20 };
+  const isPremium = () => window.Billing ? window.Billing.isPremium() : true;
+  const maxTeams  = () => isPremium() ? MAX.teams  : FREE.teams;
+  const maxRounds = () => isPremium() ? MAX.rounds : FREE.rounds;
+
   // ---------- Preferencias persistentes (localStorage) ----------
   const PREFS_KEY = 'deco-dialect:prefs';
   function savePrefs() {
@@ -45,6 +54,12 @@
       if (Array.isArray(p.names)) state.names = p.names;
       if (p.sound === false) SFX.setEnabled(false);
     } catch (_) { /* json corrupto: arranca con valores por defecto */ }
+  }
+
+  // Ajusta equipos/rondas a los topes vigentes (al cargar y al cambiar premium).
+  function enforceLimits() {
+    state.teams = clamp(state.teams, 2, maxTeams());
+    state.rounds = clamp(state.rounds, 1, maxRounds());
   }
 
   // ---------- i18n ----------
@@ -97,8 +112,13 @@
     $('#val-rounds').textContent = state.rounds;
   }
   function setupStepper(name, delta) {
-    if (name === 'teams') { state.teams = clamp(state.teams + delta, 2, 20); renderTeamNames(); }
-    if (name === 'rounds') state.rounds = clamp(state.rounds + delta, 1, 20);
+    // si el usuario gratuito intenta superar su tope, ofrecemos desbloquear
+    if (delta > 0 && !isPremium()) {
+      if (name === 'teams' && state.teams >= FREE.teams) { SFX.tap(); openUnlock(); return; }
+      if (name === 'rounds' && state.rounds >= FREE.rounds) { SFX.tap(); openUnlock(); return; }
+    }
+    if (name === 'teams') { state.teams = clamp(state.teams + delta, 2, maxTeams()); renderTeamNames(); }
+    if (name === 'rounds') state.rounds = clamp(state.rounds + delta, 1, maxRounds());
     updateSteppers(); SFX.tap(); savePrefs();
   }
 
@@ -115,7 +135,10 @@
   }
   // Mazo de categorías barajado con puntero: cada categoría sale una vez hasta
   // agotar todas (90), evitando repeticiones aunque se acierten muchas doradas.
-  function catList() { return window.CATEGORIES[state.lang] || window.CATEGORIES['es-ES']; }
+  function catList() {
+    const all = window.CATEGORIES[state.lang] || window.CATEGORIES['es-ES'];
+    return isPremium() ? all : all.slice(0, FREE.cats);   // gratis: solo las primeras 15
+  }
   function resetCatDeck() { state.catDeck = shuffle(catList()); state.catPtr = 0; }
   function drawCategory() {
     if (!state.catDeck || !state.catDeck.length) resetCatDeck();
@@ -399,6 +422,40 @@
   function openPause() { state.paused = true; SFX.music.stop(true); $('#modal-pause').classList.add('active'); }
   function closePause() { $('#modal-pause').classList.remove('active'); state.paused = false; }
 
+  // ---------- Desbloqueo (compra) ----------
+  function refreshPremiumUI() {
+    const locked = window.Billing && window.Billing.isStoreAvailable() && !isPremium();
+    const pill = $('#btn-unlock-menu');
+    if (pill) pill.hidden = !locked;          // la píldora 🔒 solo aparece en Android sin comprar
+    const price = $('#unlock-price');
+    if (price && window.Billing) price.textContent = window.Billing.price();
+  }
+  function openUnlock() {
+    if (isPremium()) return;
+    refreshPremiumUI();
+    $('#modal-unlock').classList.add('active');
+  }
+  function closeUnlock() { $('#modal-unlock').classList.remove('active'); }
+  async function doPurchase() {
+    if (!window.Billing) return;
+    SFX.tap();
+    const ok = await window.Billing.purchase();
+    if (ok) onUnlocked();
+  }
+  async function doRestore() {
+    if (!window.Billing) return;
+    SFX.tap();
+    const ok = await window.Billing.restore();
+    if (ok) onUnlocked();
+  }
+  // Al activarse premium: cierra modal, oculta candados y refresca la UI de setup.
+  function onUnlocked() {
+    closeUnlock();
+    refreshPremiumUI();
+    SFX.win();
+    if ($('#screen-setup').classList.contains('active')) { updateSteppers(); }
+  }
+
   // ---------- Eventos ----------
   function bind() {
     // idioma
@@ -440,6 +497,12 @@
     });
     $('#btn-skip').addEventListener('click', () => skipCategory());
     $('#btn-pause').addEventListener('click', () => { SFX.tap(); openPause(); });
+    // desbloqueo (compra)
+    $('#btn-unlock-menu').addEventListener('click', () => { SFX.tap(); openUnlock(); });
+    $('#btn-unlock-buy').addEventListener('click', doPurchase);
+    $('#btn-unlock-restore').addEventListener('click', doRestore);
+    $('#btn-unlock-close').addEventListener('click', () => { SFX.tap(); closeUnlock(); });
+    $('#modal-unlock').addEventListener('click', e => { if (e.target.id === 'modal-unlock') closeUnlock(); });
     // pausa
     $('#btn-resume').addEventListener('click', () => { SFX.tap(); closePause(); });   // sin música en partida
     $('#btn-restart').addEventListener('click', () => { SFX.tap(); closePause(); beginTurn(); });
@@ -488,10 +551,14 @@
 
   // ---------- Init ----------
   loadPrefs();
+  enforceLimits();        // respeta los topes free/premium sobre lo cargado
   applyI18n();
   updateSteppers();
   syncUiFromPrefs();
   bind();
+  refreshPremiumUI();
+  // si la tienda confirma la compra de forma asíncrona (al iniciar o al comprar/restaurar)
+  if (window.Billing) window.Billing.onChange(() => { enforceLimits(); updateSteppers(); refreshPremiumUI(); });
 
   // ocultar el splash del DOM cuando acabe su animación de salida (~2.8s)
   const sp = $('#splash');

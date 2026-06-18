@@ -1,11 +1,12 @@
 /* Service Worker — cachea todo para juego offline e instalable (PWA/TWA). */
-const CACHE = 'deco-dialect-v23';
+const CACHE = 'deco-dialect-v24';
 const ASSETS = [
   './',
   './index.html',
   './css/style.css',
   './js/i18n.js',
   './js/data.js',
+  './js/billing.js',
   './js/audio.js',
   './js/render.js',
   './js/game.js',

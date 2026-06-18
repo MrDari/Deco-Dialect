@@ -560,6 +560,29 @@ h1, h2 { font-weight: 600; }
 .rules b { color: var(--gold-2); }
 .pause-menu { display: flex; flex-direction: column; gap: 14px; }
 
+/* ---------- Desbloqueo (compra) ---------- */
+/* píldora 🔒 en el menú: discreta, esquina superior derecha */
+.unlock-pill {
+  position: absolute; top: 12px; right: 12px; z-index: 3; max-width: calc(100% - 80px);
+  border: 1px solid var(--gold); background: #e9c2701a; color: var(--gold-2);
+  font-family: 'Cinzel', serif; font-weight: 600; letter-spacing: .3px;
+  font-size: 10.5px; white-space: nowrap; padding: 6px 10px; border-radius: 999px; cursor: pointer;
+  box-shadow: 0 0 10px -2px #e9c27066;
+}
+.unlock-pill:active { transform: scale(.95); }
+.unlock-modal { display: flex; flex-direction: column; gap: 12px; text-align: center; }
+.unlock-modal .section-title { margin-bottom: 4px; }
+.unlock-blurb { color: var(--ink-dim); font-size: 14px; letter-spacing: .5px; }
+.unlock-feats { list-style: none; text-align: left; display: flex; flex-direction: column; gap: 10px; margin: 4px 0 8px; }
+.unlock-feats li { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--ink); }
+.unlock-feats .uf-ic { font-size: 20px; width: 26px; text-align: center; flex: 0 0 auto; }
+.link-btn {
+  background: none; border: 0; color: var(--ink-dim); cursor: pointer;
+  font-family: inherit; font-size: 13px; letter-spacing: 1px; text-decoration: underline;
+  padding: 6px; margin-top: 2px;
+}
+.link-btn:active { color: var(--gold-2); }
+
 /* ---------- Animaciones ---------- */
 @keyframes pop { 0%{transform:scale(1)} 45%{transform:scale(1.12)} 100%{transform:scale(1)} }
 .pop { animation: pop .2s ease; }
