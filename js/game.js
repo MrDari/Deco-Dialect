@@ -436,24 +436,34 @@
     $('#modal-unlock').classList.add('active');
   }
   function closeUnlock() { $('#modal-unlock').classList.remove('active'); }
+  // El cierre del modal y el feedback NO se disparan aquí: la compra se confirma de
+  // forma ASÍNCRONA (Google verifica el recibo tras order()). Quien cierra el modal es
+  // el listener onChange de Billing (ver init) en cuanto premium pasa a true. Así no
+  // hace falta volver a pulsar el botón.
   async function doPurchase() {
     if (!window.Billing) return;
     SFX.tap();
-    const ok = await window.Billing.purchase();
-    if (ok) onUnlocked();
+    const btn = $('#btn-unlock-buy');
+    if (btn) btn.disabled = true;            // evita doble pulsación mientras procesa
+    try { await window.Billing.purchase(); } finally { if (btn) btn.disabled = false; }
+    // si la compra ya constaba al volver (caso raro), onChange no saltará: cerramos aquí
+    if (isPremium()) onUnlocked();
   }
   async function doRestore() {
     if (!window.Billing) return;
     SFX.tap();
-    const ok = await window.Billing.restore();
-    if (ok) onUnlocked();
+    await window.Billing.restore();
+    if (isPremium()) onUnlocked();
   }
   // Al activarse premium: cierra modal, oculta candados y refresca la UI de setup.
+  // Idempotente: si el modal ya está cerrado no hace nada visible de más.
   function onUnlocked() {
+    const wasOpen = $('#modal-unlock').classList.contains('active');
     closeUnlock();
     refreshPremiumUI();
-    SFX.win();
-    if ($('#screen-setup').classList.contains('active')) { updateSteppers(); }
+    enforceLimits();
+    if ($('#screen-setup').classList.contains('active')) updateSteppers();
+    if (wasOpen) SFX.win();                  // fanfarria solo si veníamos del modal
   }
 
   // ---------- Eventos ----------
@@ -557,8 +567,13 @@
   syncUiFromPrefs();
   bind();
   refreshPremiumUI();
-  // si la tienda confirma la compra de forma asíncrona (al iniciar o al comprar/restaurar)
-  if (window.Billing) window.Billing.onChange(() => { enforceLimits(); updateSteppers(); refreshPremiumUI(); });
+  // La tienda confirma la compra de forma ASÍNCRONA (al iniciar, comprar o restaurar).
+  // Cuando premium pasa a true, onUnlocked cierra el modal y refresca toda la UI →
+  // el usuario no tiene que volver a pulsar nada.
+  if (window.Billing) window.Billing.onChange(prem => {
+    if (prem) onUnlocked();
+    else { enforceLimits(); updateSteppers(); refreshPremiumUI(); }
+  });
 
   // ocultar el splash del DOM cuando acabe su animación de salida (~2.8s)
   const sp = $('#splash');

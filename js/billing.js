@@ -46,12 +46,16 @@ window.Billing = (() => {
     try {
       const { store, ProductType, Platform } = window.CdvPurchase;
       store.register([{ id: PRODUCT_ID, type: ProductType.NON_CONSUMABLE, platform: Platform.GOOGLE_PLAY }]);
+      // ¿La transacción incluye nuestro producto? (señal fiable de compra)
+      const ownsUnlock = t => !!(t && t.products && t.products.some(p => p.id === PRODUCT_ID));
       store.when()
         .productUpdated(p => {
           if (p && p.id === PRODUCT_ID && p.pricing && p.pricing.price) { priceStr = p.pricing.price; notify(); }
         })
-        .approved(t => t.verify())
-        .verified(r => r.finish())
+        // approved llega nada más confirmar el pago: activamos YA premium (rápido) y verificamos.
+        .approved(t => { if (ownsUnlock(t)) setPremium(true); t.verify(); })
+        .verified(r => { setPremium(true); r.finish(); })
+        // respaldo: cualquier actualización del recibo donde ya conste como propietario
         .receiptUpdated(() => { if (store.owned(PRODUCT_ID)) setPremium(true); });
       store.initialize([Platform.GOOGLE_PLAY]).then(() => {
         const p = store.get(PRODUCT_ID);
