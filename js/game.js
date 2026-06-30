@@ -16,6 +16,7 @@
   const state = {
     lang: 'es-ES',
     teams: 2, rounds: 5, time: 60,
+    activeRounds: 5,          // rondas de la partida EN CURSO (blitz la fuerza a 1)
     mode: 'classic',          // classic | blitz | golden | hard
     pack: 'all',              // all | nature | world | culture | daily | quirky
     names: [], scores: [],
@@ -166,7 +167,8 @@
   }
   function updateSteppers() {
     $('#val-teams').textContent = state.teams;
-    $('#val-rounds').textContent = state.rounds;
+    // Contrarreloj es a ronda única: el contador muestra 1 aunque haya otra preferencia guardada.
+    $('#val-rounds').textContent = state.mode === 'blitz' ? 1 : state.rounds;
   }
 
   // Refleja modo y pack seleccionados (chips activos + candado en los premium).
@@ -183,12 +185,13 @@
     });
     const desc = $('#mode-desc');
     if (desc) desc.textContent = t(MODE_DESC[state.mode]);
-    syncDurationLock();
+    syncModeLocks();
   }
-  // Contrarreloj fuerza turnos de 30 s: bloqueamos el selector de Duración y lo
-  // fijamos visualmente en 30, así no hay contradicción (antes elegías 60 y jugabas 30).
-  function syncDurationLock() {
+  // Contrarreloj es un modo especial: turnos cortos que crecen acertando Y a RONDA
+  // ÚNICA (más épico, todo a una carta). Bloqueamos Duración y Rondas y los fijamos.
+  function syncModeLocks() {
     const blitz = state.mode === 'blitz';
+    // Duración: en blitz se fija en 30 (tope que gana el reloj) y se deshabilita
     const seg = document.querySelector('[data-seg="time"]');
     if (seg) seg.classList.toggle('locked', blitz);
     $$('[data-seg="time"] .seg-btn').forEach(b => {
@@ -196,6 +199,13 @@
       const on = blitz ? (+b.dataset.val === 30) : (+b.dataset.val === state.time);
       b.classList.toggle('active', on);
     });
+    // Rondas: en blitz se fija en 1 y se deshabilita el stepper
+    const roundStepper = document.querySelector('[data-stepper="rounds"]');
+    if (roundStepper) {
+      roundStepper.classList.toggle('locked', blitz);
+      $$('.step-btn', roundStepper).forEach(b => { b.disabled = blitz; });
+    }
+    updateSteppers();
   }
   const MODE_DESC = { classic: 'modeClassicDesc', blitz: 'modeBlitzDesc', golden: 'modeGoldenDesc', hard: 'modeHardDesc' };
   function selectMode(m) {
@@ -207,6 +217,8 @@
     state.pack = p; SFX.tap(); renderModePack(); savePrefs();
   }
   function setupStepper(name, delta) {
+    // Contrarreloj es a ronda única: el stepper de Rondas no responde en ese modo
+    if (name === 'rounds' && state.mode === 'blitz') return;
     // si el usuario gratuito intenta superar su tope, ofrecemos desbloquear
     if (delta > 0 && !isPremium()) {
       if (name === 'teams' && state.teams >= FREE.teams) { SFX.tap(); openUnlock(); return; }
@@ -264,7 +276,7 @@
   function pickRoundCategories() {
     resetCatDeck();
     const picked = [];
-    for (let i = 0; i < state.rounds; i++) picked.push(drawCategory());
+    for (let i = 0; i < state.activeRounds; i++) picked.push(drawCategory());
     return picked;
   }
 
@@ -272,8 +284,11 @@
   function startGame() {
     state.scores = new Array(state.teams).fill(0);
     state.round = 1; state.current = 0;
-    // Contrarreloj: el anillo/barra usa el tope (BLITZ_MAX) como referencia, aunque el
-    // turno ARRANQUE en BLITZ_START (el resto del tiempo se "gana" acertando).
+    // Contrarreloj: a RONDA ÚNICA (más épico, todo a una carta). Usamos activeRounds
+    // para la partida en curso y NO tocamos state.rounds (la preferencia guardada).
+    state.activeRounds = state.mode === 'blitz' ? 1 : state.rounds;
+    // El anillo/barra usa el tope (BLITZ_MAX) como referencia, aunque el turno
+    // ARRANQUE en BLITZ_START (el resto del tiempo se "gana" acertando).
     state.turnDuration = state.mode === 'blitz' ? BLITZ_MAX : state.time;
     state.stats = { totalHits: 0, bestTurn: 0, bestStreak: 0 };
     state.roundCategories = pickRoundCategories();
@@ -529,7 +544,7 @@
 
     // ¿es el último equipo de la ronda? -> fin de ronda
     const isRoundEnd = state.current >= state.teams - 1;
-    const isGameEnd = isRoundEnd && state.round >= state.rounds;
+    const isGameEnd = isRoundEnd && state.round >= state.activeRounds;
     const banner = $('#sum-banner');
     const sub = $('#sum-sub');
 
@@ -552,7 +567,7 @@
     state.current++;
     if (state.current >= state.teams) {
       state.current = 0; state.round++;
-      if (state.round > state.rounds) return endGame();
+      if (state.round > state.activeRounds) return endGame();
     }
     showTurnIntro();
   }

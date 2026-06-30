@@ -29,7 +29,7 @@ window.I18N = {
     modeLabel: 'Modo',
     modeClassic: 'Clásico', modeBlitz: 'Contrarreloj', modeGolden: 'Solo doradas', modeHard: 'Difícil',
     modeClassicDesc: 'La experiencia completa: categorías y letras, normal y dorada.',
-    modeBlitzDesc: 'Empiezas con 20 s y cada acierto suma +2 s (hasta 30). ¡No dejes morir el reloj!',
+    modeBlitzDesc: 'Ronda única. Empiezas con 20 s y cada acierto suma +2 s (hasta 30). ¡No dejes morir el reloj!',
     modeGoldenDesc: 'Solo cartas doradas (+2). Cada acierto cambia la categoría.',
     modeHardDesc: 'Letras difíciles (Q, X, K, Z…). Para los más rápidos de mente.',
     // Packs temáticos
@@ -82,7 +82,7 @@ window.I18N = {
     modeLabel: 'Mode',
     modeClassic: 'Classic', modeBlitz: 'Blitz', modeGolden: 'Golden only', modeHard: 'Hard',
     modeClassicDesc: 'The full experience: categories and letters, normal and golden.',
-    modeBlitzDesc: 'Start with 20 s; every hit adds +2 s (up to 30). Keep the clock alive!',
+    modeBlitzDesc: 'Single round. Start with 20 s; every hit adds +2 s (up to 30). Keep the clock alive!',
     modeGoldenDesc: 'Golden cards only (+2). Every hit changes the category.',
     modeHardDesc: 'Tricky letters (Q, X, K, Z…). For the quick-minded.',
     // Theme packs
