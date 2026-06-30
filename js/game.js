@@ -25,6 +25,7 @@
     turnDuration: 60,         // duración real del turno (blitz la fuerza a 30)
     timer: null, remaining: 0, paused: false,
     roundCategories: [],
+    blitzCats: [], blitzPtr: 0,  // Contrarreloj: carta de 5 categorías + puntero activo (0..4)
     catDeck: [], catPtr: 0,   // mazo barajado de categorías (sin repetición)
     cards: [],  // 3 cartas: [normal, normal, gold]
     // racha (combo) y estadísticas de la partida
@@ -279,6 +280,13 @@
     for (let i = 0; i < state.activeRounds; i++) picked.push(drawCategory());
     return picked;
   }
+  // Contrarreloj: reparte una CARTA de 5 categorías nuevas y deja el puntero en la 1ª.
+  // El acierto dorado avanza por ellas; al pasar de la 5ª se reparte otra carta.
+  function dealBlitzCard() {
+    state.blitzCats = [];
+    for (let i = 0; i < CAT_PAGE; i++) state.blitzCats.push(drawCategory());
+    state.blitzPtr = 0;
+  }
 
   // ---------- Flujo ----------
   function startGame() {
@@ -310,6 +318,7 @@
     state.remaining = state.mode === 'blitz' ? BLITZ_START : state.turnDuration;
     state.paused = false;
     state.streak = 0; state.lastHitAt = 0;
+    if (state.mode === 'blitz') dealBlitzCard();   // carta de 5 categorías para este turno
     state.cards = buildCards();
 
     $('#hud-round').textContent = state.round;
@@ -355,6 +364,17 @@
   // siempre la que contiene la ronda en curso, numerada 1..5 desde su inicio.
   function renderCategoryCard() {
     const box = $('#cat-list'); box.innerHTML = '';
+    // Contrarreloj: carta de 5 categorías; la activa es la del puntero, las anteriores
+    // quedan "hechas". La dorada avanza el puntero (1→5) y al final reparte otra carta.
+    if (state.mode === 'blitz') {
+      state.blitzCats.forEach((cat, i) => {
+        const row = document.createElement('div');
+        row.className = 'cat-row' + (i < state.blitzPtr ? ' done' : i === state.blitzPtr ? ' active' : '');
+        row.innerHTML = `<span class="cat-idx">${i + 1}</span><span class="cat-text">${cat}</span>`;
+        box.appendChild(row);
+      });
+      return;
+    }
     const pageStart = Math.floor((state.round - 1) / CAT_PAGE) * CAT_PAGE;
     const page = state.roundCategories.slice(pageStart, pageStart + CAT_PAGE);
     page.forEach((cat, i) => {
@@ -403,9 +423,16 @@
     renewAllLetters();
     if (gold) {
       state.turnPoints += 2;
-      // la dorada también renueva la CATEGORÍA activa por otra nueva (sin repetir)
-      state.roundCategories[state.round - 1] = drawCategory();
-      refreshCategoryActive();
+      if (state.mode === 'blitz') {
+        // Contrarreloj: la dorada AVANZA por la carta de 5 categorías (1→2→…→5).
+        // Al hacer dorada en la última, se reparte una carta nueva y vuelve a la 1ª.
+        if (state.blitzPtr >= CAT_PAGE - 1) { dealBlitzCard(); renderCategoryCard(); animateCatCard(); }
+        else { state.blitzPtr++; refreshBlitzActive(); }
+      } else {
+        // resto de modos: la dorada renueva la CATEGORÍA activa por otra nueva (sin repetir)
+        state.roundCategories[state.round - 1] = drawCategory();
+        refreshCategoryActive();
+      }
       SFX.gold();
       buzz([0, 18, 40, 28]);   // doble pulso para la dorada
     } else {
@@ -466,8 +493,19 @@
   const SKIP_PENALTY = 5;
   function skipCategory() {
     if (state.paused || state.remaining <= 0) return;
-    state.roundCategories[state.round - 1] = drawCategory();
-    refreshCategoryActive();
+    if (state.mode === 'blitz') {
+      // Contrarreloj: saltar cambia SOLO la categoría activa de la carta por otra nueva.
+      state.blitzCats[state.blitzPtr] = drawCategory();
+      const row = $$('#cat-list .cat-row')[state.blitzPtr];
+      if (row) {
+        const txt = row.querySelector('.cat-text');
+        if (txt) txt.textContent = state.blitzCats[state.blitzPtr];
+        row.classList.remove('dealt'); void row.offsetWidth; row.classList.add('dealt');
+      }
+    } else {
+      state.roundCategories[state.round - 1] = drawCategory();
+      refreshCategoryActive();
+    }
     // penalización de tiempo
     state.remaining = Math.max(0, state.remaining - SKIP_PENALTY);
     updateTimerUI();
@@ -495,6 +533,24 @@
     const txt = row.querySelector('.cat-text');
     if (txt) txt.textContent = state.roundCategories[state.round - 1];
     row.classList.remove('dealt'); void row.offsetWidth; row.classList.add('dealt');
+  }
+  // Contrarreloj: mueve el resaltado a la siguiente categoría de la carta (sin re-render
+  // global) marcando la anterior como "hecha" y animando la nueva activa.
+  function refreshBlitzActive() {
+    const rows = $$('#cat-list .cat-row');
+    rows.forEach((row, i) => {
+      row.classList.toggle('done', i < state.blitzPtr);
+      const wasActive = row.classList.contains('active');
+      row.classList.toggle('active', i === state.blitzPtr);
+      if (i === state.blitzPtr && !wasActive) { row.classList.remove('dealt'); void row.offsetWidth; row.classList.add('dealt'); }
+    });
+  }
+  // anima la carta de categorías completa al repartir un grupo nuevo (Contrarreloj)
+  function animateCatCard() {
+    $$('#cat-list .cat-row').forEach((row, i) => {
+      row.classList.remove('dealt'); void row.offsetWidth;
+      setTimeout(() => row.classList.add('dealt'), i * 45);
+    });
   }
   // actualiza SOLO la letra de una carta + breve animación de reparto (sin re-render global)
   function refreshCard(i) {
