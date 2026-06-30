@@ -16,14 +16,25 @@
   const state = {
     lang: 'es-ES',
     teams: 2, rounds: 5, time: 60,
+    mode: 'classic',          // classic | blitz | golden | hard
+    pack: 'all',              // all | nature | world | culture | daily | quirky
     names: [], scores: [],
     current: 0, round: 1,
     turnPoints: 0,
+    turnDuration: 60,         // duración real del turno (blitz la fuerza a 30)
     timer: null, remaining: 0, paused: false,
     roundCategories: [],
     catDeck: [], catPtr: 0,   // mazo barajado de categorías (sin repetición)
-    cards: []   // 3 cartas: [normal, normal, gold]
+    cards: [],  // 3 cartas: [normal, normal, gold]
+    // racha (combo) y estadísticas de la partida
+    streak: 0, lastHitAt: 0,
+    stats: { totalHits: 0, bestTurn: 0, bestStreak: 0 }
   };
+
+  // Ventana de tiempo (ms) para encadenar aciertos en una racha, y umbral para
+  // que la racha se considere "en fuego" y se muestre/suene.
+  const COMBO_WINDOW = 4000;
+  const COMBO_MIN = 3;
 
   // ---------- Freemium (límites de la versión gratuita) ----------
   // En Android sin compra: 15 categorías, 2 equipos, 3 rondas. Premium = sin límites.
@@ -35,13 +46,21 @@
   const maxTeams  = () => isPremium() ? MAX.teams  : FREE.teams;
   const maxRounds = () => isPremium() ? MAX.rounds : FREE.rounds;
 
+  // Modos de juego. 'classic' es gratis; el resto son premium (más valor a la compra).
+  const MODES = ['classic', 'blitz', 'golden', 'hard'];
+  const FREE_MODES = ['classic'];
+  // Packs temáticos: 'all' es gratis; los temas concretos son premium.
+  const isModeAllowed = m => isPremium() || FREE_MODES.includes(m);
+  const isPackAllowed = p => isPremium() || p === 'all';
+
   // ---------- Preferencias persistentes (localStorage) ----------
   const PREFS_KEY = 'deco-dialect:prefs';
   function savePrefs() {
     try {
       localStorage.setItem(PREFS_KEY, JSON.stringify({
         lang: state.lang, teams: state.teams, rounds: state.rounds,
-        time: state.time, names: state.names, sound: SFX.isEnabled()
+        time: state.time, mode: state.mode, pack: state.pack,
+        names: state.names, sound: SFX.isEnabled()
       }));
     } catch (_) { /* modo privado / sin almacenamiento: se ignora */ }
   }
@@ -52,15 +71,33 @@
       if (Number.isFinite(p.teams))  state.teams  = clamp(p.teams, 2, 20);
       if (Number.isFinite(p.rounds)) state.rounds = clamp(p.rounds, 1, 20);
       if ([30, 60, 90].includes(p.time)) state.time = p.time;
+      if (MODES.includes(p.mode)) state.mode = p.mode;
+      if (p.pack === 'all' || window.CATEGORY_PACKS[p.pack]) state.pack = p.pack;
       if (Array.isArray(p.names)) state.names = p.names;
       if (p.sound === false) SFX.setEnabled(false);
     } catch (_) { /* json corrupto: arranca con valores por defecto */ }
   }
 
-  // Ajusta equipos/rondas a los topes vigentes (al cargar y al cambiar premium).
+  // ---------- Récords / estadísticas persistentes ----------
+  const RECORDS_KEY = 'deco-dialect:records';
+  const records = { best: 0, games: 0 };
+  function loadRecords() {
+    try {
+      const r = JSON.parse(localStorage.getItem(RECORDS_KEY) || '{}');
+      if (Number.isFinite(r.best))  records.best  = r.best;
+      if (Number.isFinite(r.games)) records.games = r.games;
+    } catch (_) {}
+  }
+  function saveRecords() {
+    try { localStorage.setItem(RECORDS_KEY, JSON.stringify(records)); } catch (_) {}
+  }
+
+  // Ajusta equipos/rondas/modo/pack a los topes vigentes (al cargar y al cambiar premium).
   function enforceLimits() {
     state.teams = clamp(state.teams, 2, maxTeams());
     state.rounds = clamp(state.rounds, 1, maxRounds());
+    if (!isModeAllowed(state.mode)) state.mode = 'classic';
+    if (!isPackAllowed(state.pack)) state.pack = 'all';
   }
 
   // ---------- i18n ----------
@@ -73,6 +110,17 @@
     document.documentElement.lang = state.lang.startsWith('es') ? 'es' : 'en';
     const rl = $('#rules-list'); rl.innerHTML = '';
     (t('rules') || []).forEach(r => { const li = document.createElement('li'); li.innerHTML = r; rl.appendChild(li); });
+    // textos dinámicos que dependen del idioma actual
+    renderModePack();
+    renderMenuRecords();
+  }
+
+  // ---------- Háptica (vibración) ----------
+  // Respeta el ajuste de sonido como interruptor general de feedback. Usa la API
+  // estándar navigator.vibrate (Android/Chrome la soportan; en iOS/desktop es no-op).
+  function buzz(pattern) {
+    if (!SFX.isEnabled()) return;
+    try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (_) {}
   }
 
   // ---------- Navegación ----------
@@ -91,7 +139,11 @@
   function teamName(i) { return (state.names[i] && state.names[i].trim()) || `${t('teamDefault')} ${i + 1}`; }
   function teamColor(i) { return TEAM_COLORS[i % TEAM_COLORS.length]; }
   function currentCategory() { return state.roundCategories[state.round - 1]; }
-  function pool() { return window.LETTER_POOLS[state.lang === 'en' ? 'en' : 'es']; }
+  function pool() {
+    const key = state.lang === 'en' ? 'en' : 'es';
+    // modo difícil: usa el alfabeto de letras "raras" (Q, X, K, Z, Ñ…)
+    return state.mode === 'hard' ? window.LETTER_POOLS_HARD[key] : window.LETTER_POOLS[key];
+  }
   function randLetter() { const p = pool(); return p[Math.floor(Math.random() * p.length)]; }
 
   // ---------- Setup ----------
@@ -112,6 +164,44 @@
     $('#val-teams').textContent = state.teams;
     $('#val-rounds').textContent = state.rounds;
   }
+
+  // Refleja modo y pack seleccionados (chips activos + candado en los premium).
+  function renderModePack() {
+    $$('[data-mode]').forEach(b => {
+      const m = b.dataset.mode;
+      b.classList.toggle('active', m === state.mode);
+      b.classList.toggle('locked', !isModeAllowed(m));
+    });
+    $$('[data-pack]').forEach(b => {
+      const p = b.dataset.pack;
+      b.classList.toggle('active', p === state.pack);
+      b.classList.toggle('locked', !isPackAllowed(p));
+    });
+    const desc = $('#mode-desc');
+    if (desc) desc.textContent = t(MODE_DESC[state.mode]);
+    syncDurationLock();
+  }
+  // Contrarreloj fuerza turnos de 30 s: bloqueamos el selector de Duración y lo
+  // fijamos visualmente en 30, así no hay contradicción (antes elegías 60 y jugabas 30).
+  function syncDurationLock() {
+    const blitz = state.mode === 'blitz';
+    const seg = document.querySelector('[data-seg="time"]');
+    if (seg) seg.classList.toggle('locked', blitz);
+    $$('[data-seg="time"] .seg-btn').forEach(b => {
+      b.disabled = blitz;
+      const on = blitz ? (+b.dataset.val === 30) : (+b.dataset.val === state.time);
+      b.classList.toggle('active', on);
+    });
+  }
+  const MODE_DESC = { classic: 'modeClassicDesc', blitz: 'modeBlitzDesc', golden: 'modeGoldenDesc', hard: 'modeHardDesc' };
+  function selectMode(m) {
+    if (!isModeAllowed(m)) { SFX.tap(); openUnlock(); return; }
+    state.mode = m; SFX.tap(); renderModePack(); savePrefs();
+  }
+  function selectPack(p) {
+    if (!isPackAllowed(p)) { SFX.tap(); openUnlock(); return; }
+    state.pack = p; SFX.tap(); renderModePack(); savePrefs();
+  }
   function setupStepper(name, delta) {
     // si el usuario gratuito intenta superar su tope, ofrecemos desbloquear
     if (delta > 0 && !isPremium()) {
@@ -125,20 +215,34 @@
 
   // ---------- Cartas y categorías ----------
   function buildCards() {
-    // dos letras normales distintas + una dorada distinta
+    // dos letras normales distintas + una dorada distinta. En modo "solo doradas"
+    // las tres cartas son doradas (+2) y cada acierto cambia la categoría.
     const used = new Set();
     function pick() { let c; let g = 0; do { c = randLetter(); } while (used.has(c) && g++ < 50); used.add(c); return c; }
+    const allGold = state.mode === 'golden';
     return [
-      { ch: pick(), gold: false, scored: false },
-      { ch: pick(), gold: false, scored: false },
-      { ch: pick(), gold: true,  scored: false }
+      { ch: pick(), gold: allGold, scored: false },
+      { ch: pick(), gold: allGold, scored: false },
+      { ch: pick(), gold: true,    scored: false }
     ];
   }
   // Mazo de categorías barajado con puntero: cada categoría sale una vez hasta
   // agotar todas (90), evitando repeticiones aunque se acierten muchas doradas.
   function catList() {
     const all = window.CATEGORIES[state.lang] || window.CATEGORIES['es-ES'];
-    return isPremium() ? all : all.slice(0, FREE.cats);   // gratis: solo las primeras 15
+    // Premium con un pack temático elegido: solo las categorías de ese tema.
+    if (isPremium() && state.pack !== 'all') {
+      const idx = window.CATEGORY_PACKS[state.pack];
+      if (idx && idx.length) return idx.map(i => all[i]).filter(Boolean);
+      return all;
+    }
+    if (isPremium()) return all;
+    // Gratis: ventana ROTATIVA de 15 categorías que avanza con las partidas jugadas,
+    // así el jugador free ve contenido distinto cada pocas sesiones (mejor retención).
+    const offset = (records.games * FREE.cats) % all.length;
+    const window2 = [];
+    for (let k = 0; k < FREE.cats; k++) window2.push(all[(offset + k) % all.length]);
+    return window2;
   }
   function resetCatDeck() { state.catDeck = shuffle(catList()); state.catPtr = 0; }
   function drawCategory() {
@@ -164,6 +268,9 @@
   function startGame() {
     state.scores = new Array(state.teams).fill(0);
     state.round = 1; state.current = 0;
+    // el modo Contrarreloj fuerza turnos de 30 s; el resto respeta la duración elegida
+    state.turnDuration = state.mode === 'blitz' ? 30 : state.time;
+    state.stats = { totalHits: 0, bestTurn: 0, bestStreak: 0 };
     state.roundCategories = pickRoundCategories();
     SFX.start();
     showTurnIntro();
@@ -179,8 +286,9 @@
 
   function beginTurn() {
     state.turnPoints = 0;
-    state.remaining = state.time;
+    state.remaining = state.turnDuration;
     state.paused = false;
+    state.streak = 0; state.lastHitAt = 0;
     state.cards = buildCards();
 
     $('#hud-round').textContent = state.round;
@@ -278,11 +386,41 @@
       state.roundCategories[state.round - 1] = drawCategory();
       refreshCategoryActive();
       SFX.gold();
+      buzz([0, 18, 40, 28]);   // doble pulso para la dorada
     } else {
       state.turnPoints += 1;
       SFX.score();
+      buzz(20);                // pulso corto para acierto normal
     }
+    // estadísticas de la partida
+    state.stats.totalHits++;
+    registerStreak();
     updateScorebarLive();
+  }
+
+  // Racha: aciertos encadenados dentro de COMBO_WINDOW. A partir de COMBO_MIN se
+  // muestra el banner "¡EN RACHA! xN" y suena el combo (sin alterar la puntuación,
+  // para no desbalancear el juego: la racha es feedback, no puntos extra).
+  function registerStreak() {
+    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    state.streak = (now - state.lastHitAt <= COMBO_WINDOW) ? state.streak + 1 : 1;
+    state.lastHitAt = now;
+    if (state.streak > state.stats.bestStreak) state.stats.bestStreak = state.streak;
+    if (state.streak >= COMBO_MIN) { showCombo(state.streak); SFX.combo(state.streak); buzz([0, 12, 30, 12, 30, 12]); }
+  }
+  // Banner flotante de racha (se crea una vez y se reutiliza).
+  let comboTimer = null;
+  function showCombo(n) {
+    let el = $('#combo-banner');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'combo-banner';
+      $('#screen-play').appendChild(el);
+    }
+    el.innerHTML = `<span class="combo-text">${t('comboBanner')}</span><span class="combo-x">x${n}</span>`;
+    el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+    clearTimeout(comboTimer);
+    comboTimer = setTimeout(() => el.classList.remove('show'), 900);
   }
   // breve destello de acierto en la carta tocada
   function flashScore(i) {
@@ -301,6 +439,9 @@
     state.remaining = Math.max(0, state.remaining - SKIP_PENALTY);
     updateTimerUI();
     SFX.penalty();
+    buzz([0, 40, 60, 40]);   // zumbido de penalización (más largo/áspero)
+    // saltar rompe la racha en curso
+    state.streak = 0; state.lastHitAt = 0;
     flashTimerPenalty();
     // destello del botón saltar SIN transform (no mover: está centrado con translateY)
     const sb = $('#btn-skip');
@@ -332,13 +473,23 @@
 
   // ---------- Timer ----------
   function fmt(s) { const m = Math.floor(s / 60); const r = s % 60; return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`; }
+  const RING_LEN = 326.726;   // 2·π·r con r=52 (debe coincidir con el SVG del anillo)
   function updateTimerUI() {
     const num = $('#timer-num');
     num.textContent = fmt(Math.max(0, state.remaining));
     const warn = state.remaining <= 10;
+    const frac = state.turnDuration > 0 ? Math.max(0, state.remaining / state.turnDuration) : 0;
     const fill = $('#timer-fill');
-    fill.style.width = (Math.max(0, state.remaining / state.time) * 100) + '%';
-    fill.classList.toggle('warn', warn);
+    if (fill) {
+      fill.style.width = (frac * 100) + '%';
+      fill.classList.toggle('warn', warn);
+    }
+    // anillo circular que se vacía alrededor del número
+    const ring = $('#timer-ring-fill');
+    if (ring) {
+      ring.style.strokeDashoffset = (RING_LEN * (1 - frac)).toFixed(1);
+      ring.classList.toggle('warn', warn);
+    }
     document.querySelector('.timer-plate')?.classList.toggle('warn', warn);
     document.querySelector('.timer-track')?.classList.toggle('warn', warn);
   }
@@ -354,6 +505,7 @@
   function endTurn() {
     clearInterval(state.timer);
     state.scores[state.current] += state.turnPoints;
+    if (state.turnPoints > state.stats.bestTurn) state.stats.bestTurn = state.turnPoints;
     $('#turn-points').textContent = state.turnPoints;
     renderScoreboard($('#mini-scoreboard'));
 
@@ -411,7 +563,69 @@
     if (winners.length > 1) { nameEl.textContent = t('tie'); nameEl.style.color = 'var(--gold-2)'; }
     else { nameEl.textContent = teamName(winners[0].i); nameEl.style.color = teamColor(winners[0].i); }
     renderScoreboard($('#final-scoreboard'));
+
+    // récords: cuenta la partida y comprueba récord de puntuación máxima
+    records.games++;
+    const isRecord = max > records.best;
+    if (isRecord) records.best = max;
+    saveRecords();
+
+    // estadísticas y badge de récord
+    renderStats(max, isRecord);
+
     show('screen-result');
+    launchConfetti();
+  }
+
+  // Resumen de estadísticas + insignia de récord en la pantalla final.
+  function renderStats(maxScore, isRecord) {
+    const badge = $('#record-badge');
+    if (badge) { badge.textContent = t('recordBadge'); badge.hidden = !isRecord; }
+    const box = $('#game-stats');
+    if (!box) return;
+    const rows = [
+      [t('statBestTurn'),   '+' + state.stats.bestTurn],
+      [t('statTotalHits'),  state.stats.totalHits],
+      [t('statBestStreak'), 'x' + state.stats.bestStreak]
+    ];
+    box.innerHTML = rows.map(([k, v]) =>
+      `<div class="stat-item"><span class="stat-k">${k}</span><span class="stat-v">${v}</span></div>`).join('');
+  }
+
+  // Confeti ligero en Canvas (rojo/dorado), sin librerías. Dura ~2.2 s y se limpia.
+  function launchConfetti() {
+    const cv = $('#confetti');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const W = cv.width = cv.offsetWidth, H = cv.height = cv.offsetHeight;
+    const COLORS = ['#e23048', '#e9c270', '#ffe6a8', '#ff7a52', '#ffffff'];
+    const N = 90;
+    const parts = [];
+    for (let i = 0; i < N; i++) parts.push({
+      x: Math.random() * W, y: -20 - Math.random() * H * 0.5,
+      vx: (Math.random() - 0.5) * 2.4, vy: 2 + Math.random() * 3.2,
+      r: 3 + Math.random() * 4, rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.3,
+      c: COLORS[Math.floor(Math.random() * COLORS.length)]
+    });
+    let frame = 0;
+    const MAX_FRAMES = 150;
+    let raf = 0;
+    function tickC() {
+      ctx.clearRect(0, 0, W, H);
+      const fade = frame > MAX_FRAMES - 40 ? Math.max(0, (MAX_FRAMES - frame) / 40) : 1;
+      ctx.globalAlpha = fade;
+      for (const p of parts) {
+        p.x += p.vx; p.y += p.vy; p.vy += 0.04; p.rot += p.vr;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+        ctx.fillStyle = p.c; ctx.fillRect(-p.r, -p.r * 0.5, p.r * 2, p.r);
+        ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+      if (++frame < MAX_FRAMES) raf = requestAnimationFrame(tickC);
+      else ctx.clearRect(0, 0, W, H);
+    }
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(tickC);
   }
 
   // ---------- Pausa ----------
@@ -425,6 +639,20 @@
     if (pill) pill.hidden = !locked;          // la píldora 🔒 solo aparece en Android sin comprar
     const price = $('#unlock-price');
     if (price && window.Billing) price.textContent = window.Billing.price();
+    // "Restaurar compra": solo tiene sentido en una tienda real (Android) y cuando aún
+    // no eres premium. En web/itch.io (sin tienda) y ya comprado, se oculta.
+    const restoreWrap = $('#restore-wrap');
+    if (restoreWrap) restoreWrap.hidden = !(window.Billing && window.Billing.isStoreAvailable() && !isPremium());
+  }
+  // Muestra los récords locales en el menú (oculto si aún no hay partidas jugadas).
+  function renderMenuRecords() {
+    const box = $('#menu-records');
+    if (!box) return;
+    if (records.games <= 0) { box.hidden = true; return; }
+    box.hidden = false;
+    box.innerHTML =
+      `<span class="mr-item"><span class="mr-k">${t('bestScore')}</span><span class="mr-v">${records.best}</span></span>` +
+      `<span class="mr-item"><span class="mr-k">${t('gamesPlayed')}</span><span class="mr-v">${records.games}</span></span>`;
   }
   function openUnlock() {
     if (isPremium()) return;
@@ -445,6 +673,20 @@
     // si la compra ya constaba al volver (caso raro), onChange no saltará: cerramos aquí
     if (isPremium()) onUnlocked();
   }
+  // Restaurar compra (reinstalación / móvil nuevo). Google exige ofrecerlo. Si tras
+  // consultar a Play el usuario resulta propietario, onChange/onUnlocked se encarga;
+  // si no posee nada, avisamos discretamente bajo el botón.
+  async function doRestore() {
+    if (!window.Billing) return;
+    SFX.tap();
+    const link = $('#btn-unlock-restore');
+    const msg = $('#restore-msg');
+    if (link) link.disabled = true;
+    if (msg) msg.textContent = '';
+    try { await window.Billing.restore(); } finally { if (link) link.disabled = false; }
+    // si no quedó premium, no había nada que restaurar → feedback
+    if (!isPremium() && msg) msg.textContent = t('restoreNone');
+  }
   // Al activarse premium: cierra modal, oculta candados y refresca la UI de setup.
   // Idempotente: si el modal ya está cerrado no hace nada visible de más.
   function onUnlocked() {
@@ -452,7 +694,7 @@
     closeUnlock();
     refreshPremiumUI();
     enforceLimits();
-    if ($('#screen-setup').classList.contains('active')) updateSteppers();
+    if ($('#screen-setup').classList.contains('active')) { updateSteppers(); renderModePack(); }
     if (wasOpen) SFX.win();                  // fanfarria solo si veníamos del modal
   }
 
@@ -471,7 +713,7 @@
       savePrefs();
     });
     // menú
-    $('#btn-play').addEventListener('click', () => { SFX.unlock(); SFX.tap(); SFX.music.play('menu'); renderTeamNames(); updateSteppers(); show('screen-setup'); });
+    $('#btn-play').addEventListener('click', () => { SFX.unlock(); SFX.tap(); SFX.music.play('menu'); renderTeamNames(); updateSteppers(); renderModePack(); show('screen-setup'); });
     $('#btn-howto').addEventListener('click', () => { SFX.tap(); $('#modal-howto').classList.add('active'); });
     $('#btn-close-howto').addEventListener('click', () => { SFX.tap(); $('#modal-howto').classList.remove('active'); });
     // steppers
@@ -484,6 +726,9 @@
       $$('[data-seg="time"] .seg-btn').forEach(x => x.classList.remove('active'));
       b.classList.add('active'); state.time = +b.dataset.val; SFX.tap(); savePrefs();
     }));
+    // modo de juego y pack temático
+    $$('[data-mode]').forEach(b => b.addEventListener('click', () => selectMode(b.dataset.mode)));
+    $$('[data-pack]').forEach(b => b.addEventListener('click', () => selectPack(b.dataset.pack)));
     // setup → juego
     $('#btn-back-menu').addEventListener('click', () => { SFX.tap(); show('screen-menu'); });
     $('#btn-start').addEventListener('click', () => startGame());
@@ -500,6 +745,8 @@
     // desbloqueo (compra)
     $('#btn-unlock-menu').addEventListener('click', () => { SFX.tap(); openUnlock(); });
     $('#btn-unlock-buy').addEventListener('click', doPurchase);
+    const restoreBtn = $('#btn-unlock-restore');
+    if (restoreBtn) restoreBtn.addEventListener('click', doRestore);
     $('#btn-unlock-close').addEventListener('click', () => { SFX.tap(); closeUnlock(); });
     $('#modal-unlock').addEventListener('click', e => { if (e.target.id === 'modal-unlock') closeUnlock(); });
     // pausa
@@ -546,10 +793,13 @@
     $$('.flag-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === state.lang));
     $$('[data-seg="time"] .seg-btn').forEach(b => b.classList.toggle('active', +b.dataset.val === state.time));
     $('#btn-sound')?.classList.toggle('off', !SFX.isEnabled());
+    renderModePack();
+    renderMenuRecords();
   }
 
   // ---------- Init ----------
   loadPrefs();
+  loadRecords();
   enforceLimits();        // respeta los topes free/premium sobre lo cargado
   applyI18n();
   updateSteppers();

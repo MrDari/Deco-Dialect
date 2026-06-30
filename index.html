@@ -86,6 +86,8 @@
           <button class="btn" id="btn-howto" data-i18n="howto">CÓMO JUGAR</button>
         </div>
 
+        <div class="menu-records" id="menu-records" hidden></div>
+
         <button class="icon-toggle" id="btn-sound" aria-label="Sonido" title="Sonido">♪</button>
         <button class="unlock-pill" id="btn-unlock-menu" data-i18n="unlockLocked" hidden>🔒 Versión completa</button>
       </div>
@@ -125,6 +127,31 @@
           </div>
         </div>
 
+        <!-- Modo de juego -->
+        <div class="choice-block">
+          <label class="choice-label" data-i18n="modeLabel">Modo</label>
+          <div class="chip-row" id="mode-row">
+            <button class="choice-chip" data-mode="classic" data-i18n="modeClassic">Clásico</button>
+            <button class="choice-chip" data-mode="blitz" data-i18n="modeBlitz">Contrarreloj</button>
+            <button class="choice-chip" data-mode="golden" data-i18n="modeGolden">Solo doradas</button>
+            <button class="choice-chip" data-mode="hard" data-i18n="modeHard">Difícil</button>
+          </div>
+          <p class="choice-desc" id="mode-desc"></p>
+        </div>
+
+        <!-- Pack temático -->
+        <div class="choice-block">
+          <label class="choice-label" data-i18n="packLabel">Tema</label>
+          <div class="chip-row" id="pack-row">
+            <button class="choice-chip" data-pack="all" data-i18n="packAll">Todas</button>
+            <button class="choice-chip" data-pack="nature" data-i18n="packNature">Naturaleza</button>
+            <button class="choice-chip" data-pack="world" data-i18n="packWorld">Mundo</button>
+            <button class="choice-chip" data-pack="culture" data-i18n="packCulture">Cultura</button>
+            <button class="choice-chip" data-pack="daily" data-i18n="packDaily">Día a día</button>
+            <button class="choice-chip" data-pack="quirky" data-i18n="packQuirky">Curiosas</button>
+          </div>
+        </div>
+
         <div id="team-names" class="team-names"></div>
 
         <div class="setup-actions">
@@ -151,6 +178,11 @@
       </div>
 
       <div class="timer-plate">
+        <svg class="timer-ring" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="timer-ring-bg" cx="60" cy="60" r="52" />
+          <circle class="timer-ring-fill" id="timer-ring-fill" cx="60" cy="60" r="52"
+                  stroke-dasharray="326.726" stroke-dashoffset="0" />
+        </svg>
         <span id="timer-num">01:00</span>
       </div>
       <div class="timer-track"><div class="timer-fill" id="timer-fill"></div></div>
@@ -195,11 +227,14 @@
 
     <!-- ====================== FINAL ====================== -->
     <section class="screen" id="screen-result">
-      <div class="neon-frame">
+      <canvas id="confetti" aria-hidden="true"></canvas>
+      <div class="neon-frame scroll">
+        <p class="record-badge" id="record-badge" hidden>¡NUEVO RÉCORD!</p>
         <h2 class="section-title" data-i18n="winner">¡Ganador!</h2>
         <div class="trophy">♛</div>
         <h2 class="winner-name" id="winner-name">Equipo 1</h2>
         <div class="scoreboard" id="final-scoreboard"></div>
+        <div class="game-stats" id="game-stats"></div>
         <div class="setup-actions">
           <button class="btn" id="btn-rematch" data-i18n="rematch">REVANCHA</button>
           <button class="btn btn-primary" id="btn-home" data-i18n="home">INICIO</button>
@@ -231,6 +266,10 @@
           <span data-i18n="unlockBuy">DESBLOQUEAR</span> · <span id="unlock-price">1,99 €</span>
         </button>
         <button class="btn" id="btn-unlock-close" data-i18n="unlockClose">AHORA NO</button>
+        <div id="restore-wrap" hidden>
+          <button class="link-btn" id="btn-unlock-restore" data-i18n="unlockRestore">Restaurar compra</button>
+          <p class="restore-msg" id="restore-msg"></p>
+        </div>
       </div>
     </div>
 

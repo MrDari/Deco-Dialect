@@ -151,6 +151,14 @@ window.SFX = (() => {
     tap()    { tone(440, 0.07, 'sine', 0.13); },
     score()  { tone(587, 0.1, 'sine', 0.18); setTimeout(() => tone(880, 0.14, 'sine', 0.18), 80); },
     gold()   { [659, 988, 1319].forEach((f, i) => setTimeout(() => tone(f, 0.16, 'sine', 0.16), i * 70)); },
+    // racha (combo): arpegio ascendente rápido y brillante; el tono sube con el nivel
+    combo(level) {
+      const base = 659.25;                          // E5
+      const step = Math.min(level, 6);              // sube hasta 6 niveles
+      const f0 = base * Math.pow(2, (step - 2) / 12);
+      [0, 4, 7].forEach((semi, i) =>
+        setTimeout(() => tone(f0 * Math.pow(2, semi / 12), 0.13, 'triangle', 0.17), i * 55));
+    },
     unscore(){ tone(330, 0.12, 'sine', 0.12, 200); },
     start()  { [523, 659, 880].forEach((f, i) => setTimeout(() => tone(f, 0.2, 'sine', 0.16), i * 90)); },
     // tic-tac de reloj MECÁNICO y pronunciado: alterna tic agudo / tac grave,

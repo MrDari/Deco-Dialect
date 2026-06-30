@@ -56,3 +56,22 @@ window.LETTER_POOLS = {
   es: 'AAAABBCCDDEEEEFFGGHIIIJLLMMNNOOOOPPRRRSSSTTUUVY'.split(''),
   en: 'AAAABBCCDDEEEEFFGGHHIIIJKLLMMNNOOOOPPRRRSSSTTTUUVWY'.split('')
 };
+
+/* Alfabeto DIFÍCIL (modo difícil): incluye las letras "raras" (Q, X, K, W, Z,
+   Ñ, J) con peso real, de modo que salgan a menudo y obliguen a pensar más. */
+window.LETTER_POOLS_HARD = {
+  es: 'BCDFGHJKLMNÑPQRSTVWXYZ'.split(''),
+  en: 'BCDFGHJKLMNPQRSTVWXYZ'.split('')
+};
+
+/* Packs temáticos. Las listas de categorías ES/EN son PARALELAS (el índice i es
+   el mismo concepto en ambos idiomas), así que un pack se define una sola vez
+   como conjunto de índices y vale para los dos idiomas. Un mismo índice puede
+   estar en varios packs. El pack 'all' (todas) no se define aquí: es el total. */
+window.CATEGORY_PACKS = {
+  nature: [0, 1, 9, 21, 22, 30, 38, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 70],
+  world:  [2, 3, 28, 65, 66, 67, 68, 69, 71, 16, 4, 5, 7, 11, 86, 85],
+  culture:[6, 8, 20, 24, 34, 35, 36, 37, 73, 74, 75, 76, 77, 78, 79, 27],
+  daily:  [10, 17, 18, 23, 33, 60, 61, 62, 63, 64, 72, 80, 81, 82, 83, 84],
+  quirky: [12, 14, 15, 19, 29, 31, 32, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 89, 13, 25, 26, 87, 88]
+};

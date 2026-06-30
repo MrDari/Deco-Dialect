@@ -298,9 +298,21 @@ h1, h2 { font-weight: 600; }
 .plate-label { color: var(--ink-dim); font-size: 12px; letter-spacing: 2px; }
 
 .timer-plate {
-  font-family: 'Cinzel', serif; font-size: 34px; font-weight: 700;
-  color: var(--ink); letter-spacing: 2px; line-height: 1; flex: 0 0 auto;
+  position: relative; flex: 0 0 auto;
+  width: 86px; height: 86px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif; font-size: 26px; font-weight: 700;
+  color: var(--ink); letter-spacing: 1px; line-height: 1;
 }
+/* anillo circular que se vacía alrededor del número */
+.timer-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.timer-ring-bg { fill: none; stroke: #ffffff14; stroke-width: 6; }
+.timer-ring-fill {
+  fill: none; stroke: var(--gold); stroke-width: 6; stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear, stroke .3s;
+}
+.timer-ring-fill.warn { stroke: var(--red); }
+#timer-num { position: relative; z-index: 1; }
 .timer-plate.warn {
   color: var(--red);
   text-shadow: 0 0 14px #e2304888;
@@ -625,6 +637,103 @@ h1, h2 { font-weight: 600; }
   animation: cat-shine .5s ease-out;
 }
 @keyframes cat-shine { from { transform: translateX(-110%); } to { transform: translateX(110%); } }
+
+/* ---------- Setup: secciones y rejillas (espacio bien distribuido) ---------- */
+/* Separadores sutiles entre bloques para agrupar la configuración por temas. */
+.setup-grid { padding-bottom: 16px; border-bottom: 1px solid #ffffff0e; }
+.choice-block { margin-top: 16px; text-align: left; }
+.choice-block + .choice-block { margin-top: 14px; }
+.choice-label { color: var(--ink-dim); letter-spacing: 1px; font-size: 13px; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 9px; }
+
+/* rejilla regular: los modos en 2 columnas (4 → 2×2), los temas en 3 (6 → 3×2).
+   Distribución uniforme en vez de flex-wrap irregular. */
+.chip-row { display: grid; gap: 8px; }
+#mode-row { grid-template-columns: repeat(2, 1fr); }
+#pack-row { grid-template-columns: repeat(3, 1fr); }
+
+.choice-chip {
+  position: relative; border: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  min-height: 42px; padding: 6px 10px; border-radius: 12px; text-align: center;
+  font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 14px; letter-spacing: .2px; line-height: 1.1;
+  background: #ffffff0d; color: var(--ink-dim); box-shadow: inset 0 0 0 1px #ffffff10;
+  transition: transform .1s, background .2s, color .2s, box-shadow .2s;
+}
+.choice-chip:active { transform: scale(.95); }
+.choice-chip.active {
+  color: #2a1c00; background: linear-gradient(180deg, var(--gold-2), var(--gold));
+  box-shadow: 0 4px 12px -4px #e9c27088, inset 0 1px 0 #ffffff66;
+}
+/* chip premium bloqueado: candadito */
+.choice-chip.locked::after { content: "🔒"; font-size: 10px; opacity: .8; }
+.choice-chip.locked { color: var(--ink-dim); }
+/* descripción del modo: pastilla tenue para que ocupe el espacio con intención */
+.choice-desc {
+  color: var(--ink-dim); font-size: 13px; line-height: 1.4; margin-top: 10px; min-height: 18px;
+  padding: 8px 12px; border-radius: 10px; background: #ffffff07; box-shadow: inset 0 0 0 1px #ffffff0a;
+}
+
+/* selector de duración bloqueado (modo Contrarreloj fija 30 s) */
+.seg.locked { opacity: .55; }
+.seg.locked .seg-btn { cursor: not-allowed; }
+
+/* ---------- Banner de racha (combo) ---------- */
+#combo-banner {
+  position: absolute; top: 38%; left: 50%; z-index: 4; pointer-events: none;
+  transform: translate(-50%, -50%) scale(.6); opacity: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-family: 'Cinzel', serif; font-weight: 700; text-align: center;
+}
+#combo-banner.show { animation: combo-pop .9s ease-out; }
+#combo-banner .combo-text {
+  font-size: clamp(26px, 8vw, 40px); letter-spacing: 2px;
+  color: var(--gold-2); text-shadow: 0 0 18px #e9c270cc, 0 2px 6px #000;
+}
+#combo-banner .combo-x {
+  font-size: clamp(20px, 6vw, 30px); color: #fff;
+  text-shadow: 0 0 14px #ff5a6a, 0 2px 5px #000;
+}
+@keyframes combo-pop {
+  0%   { transform: translate(-50%, -50%) scale(.5) rotate(-6deg); opacity: 0; }
+  25%  { transform: translate(-50%, -50%) scale(1.15) rotate(2deg); opacity: 1; }
+  70%  { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; }
+  100% { transform: translate(-50%, -60%) scale(.9); opacity: 0; }
+}
+
+/* ---------- Récords en el menú ---------- */
+.menu-records {
+  display: flex; justify-content: center; gap: 22px; margin: 2px 0 18px;
+}
+.menu-records .mr-item { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.menu-records .mr-k { color: var(--ink-dim); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+.menu-records .mr-v { font-family: 'Cinzel', serif; font-weight: 700; font-size: 20px; color: var(--gold-2); }
+
+/* ---------- Estadísticas en la pantalla final ---------- */
+.game-stats { display: flex; justify-content: center; gap: 14px; margin: 0 0 18px; flex-wrap: wrap; }
+.game-stats .stat-item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 10px 14px; border-radius: 12px; background: #ffffff08; min-width: 78px;
+  box-shadow: inset 0 0 0 1px #ffffff0e;
+}
+.game-stats .stat-k { color: var(--ink-dim); font-size: 11px; letter-spacing: .5px; text-transform: uppercase; }
+.game-stats .stat-v { font-family: 'Cinzel', serif; font-weight: 700; font-size: 20px; color: var(--gold-2); }
+
+/* insignia de nuevo récord */
+.record-badge {
+  display: inline-block; margin-bottom: 10px;
+  font-family: 'Cinzel', serif; font-weight: 700; letter-spacing: 2px; font-size: 15px;
+  color: #2a1c00; padding: 6px 16px; border-radius: 999px;
+  background: linear-gradient(180deg, var(--gold-2), var(--gold));
+  box-shadow: 0 0 20px -2px #e9c270aa; animation: pop .4s ease;
+}
+
+/* confeti de victoria (no interactivo, sobre la pantalla final) */
+#confetti { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+#screen-result .neon-frame { position: relative; z-index: 1; }
+
+/* mensaje de restaurar compra */
+.restore-msg { color: var(--ink-dim); font-size: 12px; margin-top: 4px; min-height: 14px; }
+#restore-wrap { margin-top: 2px; }
 
 @media (min-width: 720px) and (pointer: fine) {
   .btn:not(.btn-primary):hover { background: #ffffff1a; }

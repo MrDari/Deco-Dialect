@@ -7,21 +7,24 @@
 
 ---
 
-## v1.6 — versionCode 8 (actual)
+## v1.7 — versionCode 9 (actual)
 
 **Español (es-ES):**
 ```
-¡Ahora gratis! Juega sin coste con 15 categorías y partidas de 2 equipos y 3 rondas. Desbloquea la versión completa con un único pago: las 90 categorías, hasta 5 equipos y 20 rondas. Diseño renovado, más limpio y elegante. ¡Gracias por jugar!
+¡Nuevos modos de juego! Contrarreloj, Solo doradas y Difícil, además del Clásico. Elige tema (Naturaleza, Mundo, Cultura…), encadena rachas, siente la vibración en cada acierto y celebra con confeti y récords. Reloj visual renovado. ¡Gracias por jugar!
 ```
 
 **English (en-US):**
 ```
-Now free! Play at no cost with 15 categories and games of 2 teams and 3 rounds. Unlock the full version with a single purchase: all 90 categories, up to 5 teams and 20 rounds. Refreshed, cleaner and more elegant design. Thanks for playing!
+New game modes! Blitz, Golden only and Hard, alongside Classic. Pick a theme (Nature, World, Culture…), chain streaks, feel the haptics on every hit, and celebrate with confetti and records. Refreshed visual timer. Thanks for playing!
 ```
 
 ---
 
 ## Historial (por si necesitas reusar texto)
+
+### v1.6 — versionCode 8
+- ¡Ahora gratis! 15 categorías y partidas de 2 equipos y 3 rondas; versión completa con pago único (90 categorías, 5 equipos, 20 rondas). Diseño renovado.
 
 ### v1.5 — versionCode 7
 - Arreglo: el modal de compra se cierra solo al confirmarse (era asíncrono).

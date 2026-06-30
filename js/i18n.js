@@ -24,6 +24,25 @@ window.I18N = {
     unlockBuy: 'DESBLOQUEAR', unlockRestore: 'Restaurar compra',
     unlockClose: 'AHORA NO', unlockLocked: '🔒 Versión completa',
     unlockThanks: '¡Gracias! Versión completa activada.',
+    restoreNone: 'No hay ninguna compra que restaurar.',
+    // Modos de juego
+    modeLabel: 'Modo',
+    modeClassic: 'Clásico', modeBlitz: 'Contrarreloj', modeGolden: 'Solo doradas', modeHard: 'Difícil',
+    modeClassicDesc: 'La experiencia completa: categorías y letras, normal y dorada.',
+    modeBlitzDesc: 'Turnos de 30 s a toda velocidad. ¡Acierta todo lo que puedas!',
+    modeGoldenDesc: 'Solo cartas doradas (+2). Cada acierto cambia la categoría.',
+    modeHardDesc: 'Letras difíciles (Q, X, K, Z…). Para los más rápidos de mente.',
+    // Packs temáticos
+    packLabel: 'Tema',
+    packAll: 'Todas', packNature: 'Naturaleza', packWorld: 'Mundo',
+    packCulture: 'Cultura', packDaily: 'Día a día', packQuirky: 'Curiosas',
+    // Racha (combo)
+    comboBanner: '¡EN RACHA!',
+    // Estadísticas y récords
+    statsTitle: 'Resumen de la partida',
+    statBestTurn: 'Mejor turno', statTotalHits: 'Aciertos totales', statBestStreak: 'Mejor racha',
+    recordBadge: '¡NUEVO RÉCORD!',
+    bestScore: 'Mejor puntuación', gamesPlayed: 'Partidas jugadas',
     rules: [
       'Por turnos, cada <b>equipo</b> ve una <b>categoría</b> (la resaltada) y tres <b>cartas de letra</b> (dos normales y una <b>dorada</b>).',
       'Antes de que acabe el tiempo, deben <b>decir una palabra</b> de esa categoría que empiece por una de las letras.',
@@ -57,6 +76,25 @@ window.I18N = {
     unlockBuy: 'UNLOCK', unlockRestore: 'Restore purchase',
     unlockClose: 'NOT NOW', unlockLocked: '🔒 Full version',
     unlockThanks: 'Thanks! Full version activated.',
+    restoreNone: 'No purchase to restore.',
+    // Game modes
+    modeLabel: 'Mode',
+    modeClassic: 'Classic', modeBlitz: 'Blitz', modeGolden: 'Golden only', modeHard: 'Hard',
+    modeClassicDesc: 'The full experience: categories and letters, normal and golden.',
+    modeBlitzDesc: '30-second turns at full speed. Score as much as you can!',
+    modeGoldenDesc: 'Golden cards only (+2). Every hit changes the category.',
+    modeHardDesc: 'Tricky letters (Q, X, K, Z…). For the quick-minded.',
+    // Theme packs
+    packLabel: 'Theme',
+    packAll: 'All', packNature: 'Nature', packWorld: 'World',
+    packCulture: 'Culture', packDaily: 'Everyday', packQuirky: 'Quirky',
+    // Combo (streak)
+    comboBanner: 'ON FIRE!',
+    // Stats and records
+    statsTitle: 'Game summary',
+    statBestTurn: 'Best turn', statTotalHits: 'Total hits', statBestStreak: 'Best streak',
+    recordBadge: 'NEW RECORD!',
+    bestScore: 'Best score', gamesPlayed: 'Games played',
     rules: [
       'In turns, each <b>team</b> sees a <b>category</b> (the highlighted one) and three <b>letter cards</b> (two normal, one <b>golden</b>).',
       'Before time runs out, they must <b>say a word</b> from that category starting with one of the letters.',
