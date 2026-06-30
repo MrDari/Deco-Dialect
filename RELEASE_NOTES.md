@@ -11,12 +11,12 @@
 
 **Español (es-ES):**
 ```
-¡Nuevos modos de juego! Contrarreloj, Solo doradas y Difícil, además del Clásico. Elige tema (Naturaleza, Mundo, Cultura…), encadena rachas, siente la vibración en cada acierto y celebra con confeti y récords. Reloj visual renovado. ¡Gracias por jugar!
+¡Nuevos modos! Contrarreloj (gana tiempo acertando), Solo doradas y Difícil, además del Clásico. Elige tema (Naturaleza, Mundo, Cultura…), encadena rachas, siente la vibración en cada acierto y celebra con confeti y récords. Reloj visual de anillo y pantalla de configuración renovada. ¡Gracias por jugar!
 ```
 
 **English (en-US):**
 ```
-New game modes! Blitz, Golden only and Hard, alongside Classic. Pick a theme (Nature, World, Culture…), chain streaks, feel the haptics on every hit, and celebrate with confetti and records. Refreshed visual timer. Thanks for playing!
+New modes! Blitz (earn time by scoring), Golden only and Hard, alongside Classic. Pick a theme (Nature, World, Culture…), chain streaks, feel the haptics on every hit, and celebrate with confetti and records. Ring timer and redesigned setup screen. Thanks for playing!
 ```
 
 ---

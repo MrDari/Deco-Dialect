@@ -29,13 +29,14 @@ window.I18N = {
     modeLabel: 'Modo',
     modeClassic: 'Clásico', modeBlitz: 'Contrarreloj', modeGolden: 'Solo doradas', modeHard: 'Difícil',
     modeClassicDesc: 'La experiencia completa: categorías y letras, normal y dorada.',
-    modeBlitzDesc: 'Turnos de 30 s a toda velocidad. ¡Acierta todo lo que puedas!',
+    modeBlitzDesc: 'Empiezas con 20 s y cada acierto suma +2 s (hasta 30). ¡No dejes morir el reloj!',
     modeGoldenDesc: 'Solo cartas doradas (+2). Cada acierto cambia la categoría.',
     modeHardDesc: 'Letras difíciles (Q, X, K, Z…). Para los más rápidos de mente.',
     // Packs temáticos
     packLabel: 'Tema',
     packAll: 'Todas', packNature: 'Naturaleza', packWorld: 'Mundo',
     packCulture: 'Cultura', packDaily: 'Día a día', packQuirky: 'Curiosas',
+    namesLabel: 'Nombres de los equipos',
     // Racha (combo)
     comboBanner: '¡EN RACHA!',
     // Estadísticas y récords
@@ -81,13 +82,14 @@ window.I18N = {
     modeLabel: 'Mode',
     modeClassic: 'Classic', modeBlitz: 'Blitz', modeGolden: 'Golden only', modeHard: 'Hard',
     modeClassicDesc: 'The full experience: categories and letters, normal and golden.',
-    modeBlitzDesc: '30-second turns at full speed. Score as much as you can!',
+    modeBlitzDesc: 'Start with 20 s; every hit adds +2 s (up to 30). Keep the clock alive!',
     modeGoldenDesc: 'Golden cards only (+2). Every hit changes the category.',
     modeHardDesc: 'Tricky letters (Q, X, K, Z…). For the quick-minded.',
     // Theme packs
     packLabel: 'Theme',
     packAll: 'All', packNature: 'Nature', packWorld: 'World',
     packCulture: 'Culture', packDaily: 'Everyday', packQuirky: 'Quirky',
+    namesLabel: 'Team names',
     // Combo (streak)
     comboBanner: 'ON FIRE!',
     // Stats and records

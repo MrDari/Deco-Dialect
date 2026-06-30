@@ -36,6 +36,10 @@
   const COMBO_WINDOW = 4000;
   const COMBO_MIN = 3;
 
+  // Contrarreloj: arranca con poco tiempo y cada acierto SUMA segundos (hasta un tope).
+  // Es un modo de impulso/momentum, distinto del Clásico (que corre a tiempo fijo).
+  const BLITZ_START = 20, BLITZ_MAX = 30, BLITZ_BONUS = 2;
+
   // ---------- Freemium (límites de la versión gratuita) ----------
   // En Android sin compra: 15 categorías, 2 equipos, 3 rondas. Premium = sin límites.
   // En web (itch.io) Billing.isPremium() es true → sin límites.
@@ -154,7 +158,7 @@
       row.className = 'team-name-row';
       const color = teamColor(i);
       row.innerHTML =
-        `<span class="team-swatch" style="background:${color}"></span>` +
+        `<span class="team-swatch" style="background:${color};color:${color}"></span>` +
         `<input class="team-input" maxlength="16" data-team="${i}" placeholder="${t('teamDefault')} ${i + 1}" value="${state.names[i] || ''}">`;
       box.appendChild(row);
     }
@@ -268,8 +272,9 @@
   function startGame() {
     state.scores = new Array(state.teams).fill(0);
     state.round = 1; state.current = 0;
-    // el modo Contrarreloj fuerza turnos de 30 s; el resto respeta la duración elegida
-    state.turnDuration = state.mode === 'blitz' ? 30 : state.time;
+    // Contrarreloj: el anillo/barra usa el tope (BLITZ_MAX) como referencia, aunque el
+    // turno ARRANQUE en BLITZ_START (el resto del tiempo se "gana" acertando).
+    state.turnDuration = state.mode === 'blitz' ? BLITZ_MAX : state.time;
     state.stats = { totalHits: 0, bestTurn: 0, bestStreak: 0 };
     state.roundCategories = pickRoundCategories();
     SFX.start();
@@ -286,7 +291,8 @@
 
   function beginTurn() {
     state.turnPoints = 0;
-    state.remaining = state.turnDuration;
+    // Contrarreloj empieza en BLITZ_START; los demás modos en su duración completa.
+    state.remaining = state.mode === 'blitz' ? BLITZ_START : state.turnDuration;
     state.paused = false;
     state.streak = 0; state.lastHitAt = 0;
     state.cards = buildCards();
@@ -392,10 +398,22 @@
       SFX.score();
       buzz(20);                // pulso corto para acierto normal
     }
+    // Contrarreloj: cada acierto AÑADE tiempo (hasta el tope) → mecánica de impulso.
+    if (state.mode === 'blitz') {
+      const before = state.remaining;
+      state.remaining = Math.min(BLITZ_MAX, state.remaining + BLITZ_BONUS);
+      if (state.remaining > before) { updateTimerUI(); flashTimerBonus(); }
+    }
     // estadísticas de la partida
     state.stats.totalHits++;
     registerStreak();
     updateScorebarLive();
+  }
+  // destello VERDE "+2s" en el reloj al ganar tiempo (Contrarreloj)
+  function flashTimerBonus() {
+    const tp = document.querySelector('.timer-plate');
+    if (!tp) return;
+    tp.classList.remove('bonus'); void tp.offsetWidth; tp.classList.add('bonus');
   }
 
   // Racha: aciertos encadenados dentro de COMBO_WINDOW. A partir de COMBO_MIN se
